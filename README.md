@@ -50,6 +50,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 npm run lint
+npm test
 npm run typecheck
 npm run build
 npm run db:generate
@@ -62,7 +63,20 @@ npm run db:studio
 
 1. Create a Neon project and copy its pooled PostgreSQL connection string.
 2. Add `DATABASE_URL` and `APP_TIME_ZONE` to the Vercel project environments.
-3. Run `npm run db:deploy` against production during release.
-4. Deploy the Next.js application to Vercel.
+3. In GitHub, create an environment named `production`.
+4. Add a `DATABASE_URL` environment secret containing Neon’s direct, unpooled
+   connection string. Add required reviewers to the environment if migrations
+   should require approval.
+5. Deploy the Next.js application to Vercel.
 
 Do not commit `.env.local`; it is ignored by Git.
+
+## GitHub Actions
+
+Every pull request runs linting, unit tests, TypeScript checks, and a production
+build through `.github/workflows/ci.yml`.
+
+`.github/workflows/production-migrations.yml` runs `prisma migrate deploy` when
+migration-related files land on `main`. It can also be started manually from the
+Actions tab. Migration runs are serialized and use only the `DATABASE_URL`
+secret from the protected `production` environment.

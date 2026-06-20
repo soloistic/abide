@@ -56,6 +56,34 @@ Use `prisma migrate deploy` for production migrations. Pages call Next.js
 `connection()` before database reads, keeping database work at request time
 instead of during Vercel’s build.
 
+### Continuous integration
+
+Pull requests run a single required-quality job containing:
+
+- dependency installation from the lockfile;
+- ESLint;
+- unit tests;
+- TypeScript checking;
+- the production Next.js build.
+
+The CI build uses a non-routable placeholder `DATABASE_URL`. Prisma needs a
+syntactically valid URL during client generation, but database-backed pages use
+request-time rendering and do not connect during the build.
+
+### Production migrations
+
+The production migration workflow runs when migration-related files reach
+`main`, and supports manual dispatch for recovery or controlled releases. It:
+
+- uses the protected GitHub environment named `production`;
+- reads Neon’s direct, unpooled connection URL from its `DATABASE_URL` secret;
+- serializes runs so two migrations cannot execute concurrently;
+- applies only checked-in migrations with `prisma migrate deploy`.
+
+Configure required reviewers on the GitHub environment when a human approval
+should gate production schema changes. The Vercel application can continue to
+use Neon’s pooled connection string independently.
+
 ## Product and usability guardrails
 
 - Language describes awareness and growth, never performance or holiness scores.
