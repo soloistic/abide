@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Fruit {
+  LOVE
+  JOY
+  PEACE
+  PATIENCE
+  KINDNESS
+  GOODNESS
+  FAITHFULNESS
+  GENTLENESS
+  SELF_CONTROL
+}
+
+model FruitReflection {
+  id             String   @id @default(cuid())
+  reflectionDate DateTime @unique @db.Date
+  journalText    String
+  fruits         Fruit[]
+  scriptureRef   String?
+  lessonLearned  String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([reflectionDate(sort: Desc)])
+}

@@ -1,65 +1,116 @@
-import Image from "next/image";
+import Link from "next/link";
+import { FruitTags } from "@/components/fruit-tags";
+import { formatReflectionDate } from "@/lib/dates";
+import {
+  getRecentReflections,
+  getTodayReflection,
+} from "@/lib/reflections";
 
-export default function Home() {
+function excerpt(value: string, length = 150) {
+  return value.length > length ? `${value.slice(0, length).trimEnd()}…` : value;
+}
+
+export default async function Home() {
+  const [todayReflection, recentReflections] = await Promise.all([
+    getTodayReflection(),
+    getRecentReflections(),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="page-shell">
+      <header className="site-header">
+        <Link className="wordmark" href="/">
+          Abide
+        </Link>
+        <p>A quiet record of transformation</p>
+      </header>
+
+      <section className="hero">
+        <p className="eyebrow">Your fruit reflection</p>
+        <h1>How is God changing you?</h1>
+        <p>
+          Notice the moments where love, joy, peace, and the other fruits are
+          taking root in ordinary life.
+        </p>
+      </section>
+
+      <section className="today-card" aria-labelledby="today-heading">
+        <div>
+          <p className="eyebrow">Today</p>
+          {todayReflection ? (
+            <>
+              <h2 id="today-heading">You made space to reflect.</h2>
+              <FruitTags fruits={todayReflection.fruits} />
+              <p className="today-lesson">
+                {excerpt(todayReflection.lessonLearned, 180)}
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 id="today-heading">Your reflection is still open.</h2>
+              <p>
+                There is no pressure to perform—only an invitation to notice
+                what happened and what may be growing.
+              </p>
+            </>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <Link
+          className="button button-primary"
+          href={
+            todayReflection
+              ? `/reflections/${todayReflection.id}`
+              : "/reflections/new"
+          }
+        >
+          {todayReflection ? "Read today’s reflection" : "Reflect on today"}
+        </Link>
+      </section>
+
+      <section className="recent-section" aria-labelledby="recent-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Your journey</p>
+            <h2 id="recent-heading">Recent reflections</h2>
+          </div>
         </div>
-      </main>
-    </div>
+
+        {recentReflections.length ? (
+          <div className="reflection-list">
+            {recentReflections.map((reflection) => (
+              <Link
+                className="reflection-card"
+                href={`/reflections/${reflection.id}`}
+                key={reflection.id}
+              >
+                <time dateTime={reflection.reflectionDate.toISOString()}>
+                  {formatReflectionDate(reflection.reflectionDate, {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </time>
+                <div>
+                  <FruitTags fruits={reflection.fruits} />
+                  <p>{excerpt(reflection.journalText)}</p>
+                  {reflection.scriptureRef ? (
+                    <span className="rooted-in">
+                      Rooted in {reflection.scriptureRef}
+                    </span>
+                  ) : null}
+                </div>
+                <span aria-hidden="true">→</span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h3>Your story begins with one honest moment.</h3>
+            <p>
+              Recent reflections will gather here as a gentle record of growth.
+            </p>
+          </div>
+        )}
+      </section>
+    </main>
   );
 }

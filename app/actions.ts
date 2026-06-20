@@ -1,0 +1,96 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { dateKeyToUtc, getDateKey } from "@/lib/dates";
+import { FRUITS } from "@/lib/fruits";
+import { prisma } from "@/lib/prisma";
+
+const reflectionSchema = z.object({
+  journalText: z
+    .string()
+    .trim()
+    .min(10, "Write a little more about what happened today.")
+    .max(5000, "Keep this reflection under 5,000 characters."),
+  fruits: z
+    .array(z.enum(FRUITS))
+    .min(1, "Choose at least one fruit that was present."),
+  scriptureRef: z
+    .string()
+    .trim()
+    .max(120, "Keep the Scripture reference under 120 characters."),
+  lessonLearned: z
+    .string()
+    .trim()
+    .min(5, "Share a little about what God is teaching you.")
+    .max(5000, "Keep this reflection under 5,000 characters."),
+});
+
+export type ReflectionFormState = {
+  message?: string;
+  errors?: Partial<
+    Record<"journalText" | "fruits" | "scriptureRef" | "lessonLearned", string[]>
+  >;
+  values?: {
+    journalText: string;
+    fruits: string[];
+    scriptureRef: string;
+    lessonLearned: string;
+  };
+};
+
+export async function createReflection(
+  _previousState: ReflectionFormState,
+  formData: FormData,
+): Promise<ReflectionFormState> {
+  const values = {
+    journalText: String(formData.get("journalText") ?? ""),
+    fruits: formData.getAll("fruits").map(String),
+    scriptureRef: String(formData.get("scriptureRef") ?? ""),
+    lessonLearned: String(formData.get("lessonLearned") ?? ""),
+  };
+  const result = reflectionSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: "A few details need your attention.",
+      errors: result.error.flatten().fieldErrors,
+      values,
+    };
+  }
+
+  let reflectionId: string;
+
+  try {
+    const reflection = await prisma.fruitReflection.create({
+      data: {
+        reflectionDate: dateKeyToUtc(getDateKey()),
+        journalText: result.data.journalText,
+        fruits: result.data.fruits,
+        scriptureRef: result.data.scriptureRef || null,
+        lessonLearned: result.data.lessonLearned,
+      },
+    });
+    reflectionId = reflection.id;
+  } catch (error) {
+    const knownError = error as { code?: string };
+
+    if (knownError.code === "P2002") {
+      return {
+        message: "Today’s reflection already exists. Open it from the dashboard.",
+        values,
+      };
+    }
+
+    console.error("Unable to save reflection", error);
+    return {
+      message: "We couldn’t save your reflection. Please try again.",
+      values,
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/reflections");
+  redirect(`/reflections/${reflectionId}`);
+}
