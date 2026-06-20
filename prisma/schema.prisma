@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Fruit {
+  LOVE
+  JOY
+  PEACE
+  PATIENCE
+  KINDNESS
+  GOODNESS
+  FAITHFULNESS
+  GENTLENESS
+  SELF_CONTROL
+}
+
+model FruitReflection {
+  id                 String   @id @default(cuid())
+  reflectionDate     DateTime @unique @map("reflection_date") @db.Date
+  journalText        String   @map("journal_text")
+  fruits             Fruit[]
+  scriptureReference String?  @map("scripture_reference")
+  lessonLearned      String   @map("lesson_learned")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("fruit_reflections")
+}
