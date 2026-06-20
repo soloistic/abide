@@ -70,6 +70,9 @@ The CI build uses a non-routable placeholder `DATABASE_URL`. Prisma needs a
 syntactically valid URL during client generation, but database-backed pages use
 request-time rendering and do not connect during the build.
 
+The typecheck script runs `next typegen` before TypeScript so route-aware helpers
+such as `PageProps` are available in clean CI environments.
+
 ### Production migrations
 
 The production migration workflow runs when migration-related files reach
