@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
 import { formatReflectionDate } from "@/lib/dates";
+import { FRUIT_LABELS } from "@/lib/fruits";
+import { countFruitTrends } from "@/lib/reflection-insights";
 import {
+  getAllReflections,
   getRecentReflections,
   getTodayReflection,
 } from "@/lib/reflections";
@@ -11,10 +14,13 @@ function excerpt(value: string, length = 150) {
 }
 
 export default async function Home() {
-  const [todayReflection, recentReflections] = await Promise.all([
+  const [todayReflection, recentReflections, allReflections] = await Promise.all([
     getTodayReflection(),
     getRecentReflections(),
+    getAllReflections(),
   ]);
+  const fruitTrends = countFruitTrends(allReflections);
+  const highestCount = fruitTrends[0]?.count ?? 0;
 
   return (
     <main className="page-shell">
@@ -22,7 +28,10 @@ export default async function Home() {
         <Link className="wordmark" href="/">
           Abide
         </Link>
-        <p>A quiet record of transformation</p>
+        <nav className="header-nav" aria-label="Primary navigation">
+          <Link href="/reflections/timeline">Fruit timeline</Link>
+          <span>A quiet record of transformation</span>
+        </nav>
       </header>
 
       <section className="hero">
@@ -67,12 +76,60 @@ export default async function Home() {
         </Link>
       </section>
 
+      <section className="trends-section" aria-labelledby="trends-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">What you have noticed</p>
+            <h2 id="trends-heading">Fruit appearing in your reflections</h2>
+          </div>
+        </div>
+
+        {fruitTrends.length ? (
+          <>
+            <p className="section-intro">
+              These are the fruits you have named most often—not a score, simply
+              a way to notice where growth has been catching your attention.
+            </p>
+            <ol className="trend-list">
+              {fruitTrends.map((trend) => (
+                <li key={trend.fruit}>
+                  <div>
+                    <span>{FRUIT_LABELS[trend.fruit]}</span>
+                    <span>
+                      {trend.count} {trend.count === 1 ? "reflection" : "reflections"}
+                    </span>
+                  </div>
+                  <span className="trend-track" aria-hidden="true">
+                    <span
+                      style={{
+                        width: `${Math.max(12, (trend.count / highestCount) * 100)}%`,
+                      }}
+                    />
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <div className="empty-state">
+            <h3>Patterns will emerge with time.</h3>
+            <p>
+              Fruit trends will appear after you add reflections, helping you
+              notice what has been present without turning growth into a score.
+            </p>
+          </div>
+        )}
+      </section>
+
       <section className="recent-section" aria-labelledby="recent-heading">
         <div className="section-heading">
           <div>
             <p className="eyebrow">Your journey</p>
             <h2 id="recent-heading">Recent reflections</h2>
           </div>
+          <Link className="text-link" href="/reflections/timeline">
+            View fruit timeline →
+          </Link>
         </div>
 
         {recentReflections.length ? (
