@@ -2,7 +2,7 @@
 
 ## Current scope
 
-This implementation covers GitHub issues 2–8:
+This implementation covers GitHub issues 2–11:
 
 1. the `FruitReflection` Prisma model and initial PostgreSQL migration;
 2. the daily reflection form;
@@ -10,11 +10,16 @@ This implementation covers GitHub issues 2–8:
 4. recent reflection history and detail pages.
 5. a month-grouped fruit timeline;
 6. reflective fruit-frequency trends;
-7. reflection editing and confirmed deletion.
+7. reflection editing and confirmed deletion;
+8. optional, human-written prompts for a selected fruit focus;
+9. optional prayer notes attached to reflections;
+10. dashboard growth highlights based on repeated fruit across at least three
+    reflections.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
-recognise completion, revisit their history, notice recurring fruit, and amend
-or remove a reflection without turning the experience into a scorecard.
+recognise completion, revisit their history, notice recurring fruit, receive
+gentle guidance, record a prayer, and amend or remove a reflection without
+turning the experience into a scorecard.
 
 ## Structure
 
@@ -32,6 +37,9 @@ validation and accessible progressive-enhancement states.
 `FruitReflection.reflectionDate` is a PostgreSQL `DATE` with a unique constraint.
 This enforces the MVP rule of one reflection per day. Fruits are a PostgreSQL
 enum array so invalid fruit values cannot enter the database.
+Fruit focus and prayer notes are nullable so reflections created before these
+features remain valid. Prompts live in application code rather than the
+database, keeping the first version simple and editable by the product team.
 
 The MVP is deliberately single-user because authentication and account ownership
 are not part of the current issue set. Before adding authentication, add a user

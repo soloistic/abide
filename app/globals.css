@@ -43,6 +43,7 @@ a {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -209,6 +210,7 @@ a {
   background: #213e2d;
 }
 
+.highlights-section,
 .trends-section,
 .recent-section {
   padding-top: 5rem;
@@ -272,6 +274,50 @@ a {
   height: 100%;
   border-radius: inherit;
   background: var(--clay);
+}
+
+.highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.highlight-card {
+  display: flex;
+  min-height: 17rem;
+  flex-direction: column;
+  border: 1px solid rgb(182 109 76 / 22%);
+  border-radius: 1.25rem;
+  padding: clamp(1.3rem, 4vw, 2rem);
+  background: linear-gradient(145deg, #fffdf8, #f3e8dc);
+  box-shadow: var(--shadow);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(182 109 76 / 45%);
+}
+
+.highlight-card h3 {
+  margin: 0.75rem 0;
+  font-family: var(--font-cormorant), serif;
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  line-height: 1.08;
+}
+
+.highlight-card > p:not(.eyebrow) {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+.highlight-card > span {
+  margin-top: auto;
+  color: var(--sage-deep);
+  font-size: 0.8rem;
+  font-weight: 750;
 }
 
 .reflection-list {
@@ -380,7 +426,8 @@ a {
 }
 
 .reflection-form textarea,
-.reflection-form input[type="text"] {
+.reflection-form input[type="text"],
+.reflection-form select {
   width: 100%;
   border: 1px solid #cfd4ca;
   border-radius: 0.8rem;
@@ -389,8 +436,51 @@ a {
   color: var(--ink);
 }
 
+.reflection-form select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--sage-deep) 50%),
+    linear-gradient(135deg, var(--sage-deep) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) 50%,
+    calc(100% - 0.85rem) 50%;
+  background-repeat: no-repeat;
+  background-size: 0.3rem 0.3rem;
+  padding-right: 2.5rem;
+}
+
+.reflection-form textarea:focus,
+.reflection-form input[type="text"]:focus,
+.reflection-form select:focus {
+  border-color: var(--sage-deep);
+  outline: 3px solid rgb(49 83 63 / 12%);
+}
+
 .reflection-form textarea {
   resize: vertical;
+}
+
+.prompt-card {
+  margin-top: 1rem;
+  border-left: 3px solid var(--clay);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  background: #f3e8dc;
+}
+
+.prompt-card ul {
+  margin: 0.65rem 0;
+  padding-left: 1.25rem;
+}
+
+.prompt-card li + li {
+  margin-top: 0.35rem;
+}
+
+.prompt-card > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .fruit-options {
@@ -474,6 +564,23 @@ a {
   border-radius: 1rem;
   padding: 1.5rem;
   background: var(--sage);
+}
+
+.focus-note {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.reflection-detail .prayer-card {
+  border: 1px solid rgb(182 109 76 / 20%);
+  border-radius: 1rem;
+  padding: 1.4rem;
+  background: #f3e8dc;
+}
+
+.prayer-card .prose-copy {
+  margin: 0.5rem 0 0;
 }
 
 .reflection-actions {
@@ -636,6 +743,10 @@ a {
 
   .fruit-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .highlight-grid {
+    grid-template-columns: 1fr;
   }
 
   .section-heading {

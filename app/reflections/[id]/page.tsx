@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { DeleteReflectionForm } from "@/components/delete-reflection-form";
 import { FruitTags } from "@/components/fruit-tags";
 import { formatReflectionDate } from "@/lib/dates";
+import { FRUIT_LABELS } from "@/lib/fruits";
 import { getReflection } from "@/lib/reflections";
 
 export const metadata: Metadata = {
@@ -30,6 +31,11 @@ export default async function ReflectionDetailPage({
           </p>
           <h1>A moment of growth.</h1>
           <FruitTags fruits={reflection.fruits} />
+          {reflection.focusFruit ? (
+            <p className="focus-note">
+              Guided by a focus on {FRUIT_LABELS[reflection.focusFruit]}
+            </p>
+          ) : null}
         </header>
 
         <section>
@@ -48,6 +54,13 @@ export default async function ReflectionDetailPage({
           <h2>What God is teaching me</h2>
           <p className="prose-copy">{reflection.lessonLearned}</p>
         </section>
+
+        {reflection.prayerNote ? (
+          <section className="prayer-card">
+            <p className="eyebrow">A prayer from this reflection</p>
+            <p className="prose-copy">{reflection.prayerNote}</p>
+          </section>
+        ) : null}
 
         <footer className="reflection-actions">
           <Link

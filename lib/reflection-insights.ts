@@ -16,6 +16,17 @@ export type ReflectionMonth<T extends ReflectionSummary> = {
   reflections: T[];
 };
 
+type GrowthReflection = ReflectionSummary & {
+  id: string;
+  lessonLearned: string;
+};
+
+export type GrowthHighlight<T extends GrowthReflection> = {
+  fruit: FruitValue;
+  count: number;
+  reflection: T;
+};
+
 export function countFruitTrends(
   reflections: Pick<ReflectionSummary, "fruits">[],
 ): FruitTrend[] {
@@ -67,4 +78,34 @@ export function groupReflectionsByMonth<T extends ReflectionSummary>(
   }
 
   return [...months.values()];
+}
+
+export function selectGrowthHighlights<T extends GrowthReflection>(
+  reflections: T[],
+  limit = 2,
+): GrowthHighlight<T>[] {
+  if (reflections.length < 3 || limit < 1) return [];
+
+  const repeatedFruits = countFruitTrends(reflections).filter(
+    ({ count }) => count >= 2,
+  );
+  const selectedReflectionIds = new Set<string>();
+  const highlights: GrowthHighlight<T>[] = [];
+
+  for (const trend of repeatedFruits) {
+    const reflection = reflections.find(
+      (entry) =>
+        entry.fruits.includes(trend.fruit) &&
+        !selectedReflectionIds.has(entry.id),
+    );
+
+    if (!reflection) continue;
+
+    highlights.push({ ...trend, reflection });
+    selectedReflectionIds.add(reflection.id);
+
+    if (highlights.length === limit) break;
+  }
+
+  return highlights;
 }
