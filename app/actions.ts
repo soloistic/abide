@@ -40,16 +40,20 @@ export type ReflectionFormState = {
   };
 };
 
-export async function createReflection(
-  _previousState: ReflectionFormState,
-  formData: FormData,
-): Promise<ReflectionFormState> {
-  const values = {
+function getReflectionValues(formData: FormData) {
+  return {
     journalText: String(formData.get("journalText") ?? ""),
     fruits: formData.getAll("fruits").map(String),
     scriptureRef: String(formData.get("scriptureRef") ?? ""),
     lessonLearned: String(formData.get("lessonLearned") ?? ""),
   };
+}
+
+export async function createReflection(
+  _previousState: ReflectionFormState,
+  formData: FormData,
+): Promise<ReflectionFormState> {
+  const values = getReflectionValues(formData);
   const result = reflectionSchema.safeParse(values);
 
   if (!result.success) {
@@ -91,6 +95,69 @@ export async function createReflection(
   }
 
   revalidatePath("/");
-  revalidatePath("/reflections");
+  revalidatePath("/reflections/timeline");
   redirect(`/reflections/${reflectionId}`);
+}
+
+export async function updateReflection(
+  id: string,
+  _previousState: ReflectionFormState,
+  formData: FormData,
+): Promise<ReflectionFormState> {
+  const values = getReflectionValues(formData);
+  const result = reflectionSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: "A few details need your attention.",
+      errors: result.error.flatten().fieldErrors,
+      values,
+    };
+  }
+
+  try {
+    await prisma.fruitReflection.update({
+      where: { id },
+      data: {
+        journalText: result.data.journalText,
+        fruits: result.data.fruits,
+        scriptureRef: result.data.scriptureRef || null,
+        lessonLearned: result.data.lessonLearned,
+      },
+    });
+  } catch (error) {
+    const knownError = error as { code?: string };
+
+    if (knownError.code === "P2025") {
+      return { message: "This reflection could not be found." };
+    }
+
+    console.error("Unable to update reflection", error);
+    return {
+      message: "We couldn’t update your reflection. Please try again.",
+      values,
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/reflections/timeline");
+  revalidatePath(`/reflections/${id}`);
+  redirect(`/reflections/${id}`);
+}
+
+export async function deleteReflection(id: string) {
+  try {
+    await prisma.fruitReflection.delete({ where: { id } });
+  } catch (error) {
+    const knownError = error as { code?: string };
+
+    if (knownError.code !== "P2025") {
+      console.error("Unable to delete reflection", error);
+      throw new Error("Unable to delete reflection.");
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/reflections/timeline");
+  redirect("/");
 }

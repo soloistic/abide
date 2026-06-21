@@ -9,6 +9,8 @@ The first working slice includes:
 - a multi-fruit reflection form with optional Scripture reference;
 - today’s reflection status on the dashboard;
 - recent reflection history and detail pages;
+- a chronological fruit timeline and gentle fruit-frequency trends;
+- editing and confirmed deletion for saved reflections;
 - PostgreSQL persistence through Prisma.
 
 See [the product vision](docs/ABIDE_PRODUCT_VISION.md) for product boundaries and

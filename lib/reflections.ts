@@ -17,6 +17,13 @@ export async function getRecentReflections(limit = 6) {
   });
 }
 
+export async function getAllReflections() {
+  await connection();
+  return prisma.fruitReflection.findMany({
+    orderBy: { reflectionDate: "desc" },
+  });
+}
+
 export async function getReflection(id: string) {
   await connection();
   return prisma.fruitReflection.findUnique({

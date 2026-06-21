@@ -2,16 +2,19 @@
 
 ## Current scope
 
-This implementation covers GitHub issues 2–5:
+This implementation covers GitHub issues 2–8:
 
 1. the `FruitReflection` Prisma model and initial PostgreSQL migration;
 2. the daily reflection form;
 3. today’s dashboard status;
 4. recent reflection history and detail pages.
+5. a month-grouped fruit timeline;
+6. reflective fruit-frequency trends;
+7. reflection editing and confirmed deletion.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
-recognise completion of a reflection before trend or highlight features are
-built.
+recognise completion, revisit their history, notice recurring fruit, and amend
+or remove a reflection without turning the experience into a scorecard.
 
 ## Structure
 

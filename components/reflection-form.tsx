@@ -5,7 +5,7 @@ import {
   createReflection,
   type ReflectionFormState,
 } from "@/app/actions";
-import { FRUITS, FRUIT_LABELS } from "@/lib/fruits";
+import { FRUITS, FRUIT_LABELS, type FruitValue } from "@/lib/fruits";
 
 const initialState: ReflectionFormState = {};
 
@@ -14,11 +14,32 @@ function FieldError({ errors }: { errors?: string[] }) {
   return <p className="field-error">{errors[0]}</p>;
 }
 
-export function ReflectionForm() {
+type ReflectionFormProps = {
+  action?: (
+    state: ReflectionFormState,
+    formData: FormData,
+  ) => Promise<ReflectionFormState>;
+  initialValues?: {
+    journalText: string;
+    fruits: FruitValue[];
+    scriptureRef: string;
+    lessonLearned: string;
+  };
+  submitLabel?: string;
+  pendingLabel?: string;
+};
+
+export function ReflectionForm({
+  action = createReflection,
+  initialValues,
+  submitLabel = "Save today’s reflection",
+  pendingLabel = "Saving reflection…",
+}: ReflectionFormProps) {
   const [state, formAction, pending] = useActionState(
-    createReflection,
+    action,
     initialState,
   );
+  const values = state.values ?? initialValues;
 
   return (
     <form action={formAction} className="reflection-form">
@@ -34,7 +55,7 @@ export function ReflectionForm() {
           required
           minLength={10}
           maxLength={5000}
-          defaultValue={state.values?.journalText}
+          defaultValue={values?.journalText}
         />
         <FieldError errors={state.errors?.journalText} />
       </fieldset>
@@ -51,7 +72,7 @@ export function ReflectionForm() {
                 type="checkbox"
                 name="fruits"
                 value={fruit}
-                defaultChecked={state.values?.fruits.includes(fruit)}
+                defaultChecked={values?.fruits.includes(fruit)}
               />
               <span>{FRUIT_LABELS[fruit]}</span>
             </label>
@@ -71,7 +92,7 @@ export function ReflectionForm() {
           type="text"
           maxLength={120}
           placeholder="For example, Galatians 5:22–23"
-          defaultValue={state.values?.scriptureRef}
+          defaultValue={values?.scriptureRef}
         />
         <FieldError errors={state.errors?.scriptureRef} />
       </fieldset>
@@ -88,7 +109,7 @@ export function ReflectionForm() {
           required
           minLength={5}
           maxLength={5000}
-          defaultValue={state.values?.lessonLearned}
+          defaultValue={values?.lessonLearned}
         />
         <FieldError errors={state.errors?.lessonLearned} />
       </fieldset>
@@ -100,7 +121,7 @@ export function ReflectionForm() {
       ) : null}
 
       <button className="button button-primary" type="submit" disabled={pending}>
-        {pending ? "Saving reflection…" : "Save today’s reflection"}
+        {pending ? pendingLabel : submitLabel}
       </button>
     </form>
   );
