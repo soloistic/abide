@@ -76,10 +76,13 @@ Do not commit `.env.local`; it is ignored by Git.
 
 ## GitHub Actions
 
-Every pull request runs linting, unit tests, TypeScript checks, and a production
-build through `.github/workflows/ci.yml`.
+Every pull request and push to `main` runs linting, unit tests, TypeScript
+checks, and a production build through `.github/workflows/ci.yml`.
 
 `.github/workflows/production-migrations.yml` runs `prisma migrate deploy` when
 migration-related files land on `main`. It can also be started manually from the
 Actions tab. Migration runs are serialized and use only the `DATABASE_URL`
 secret from the protected `production` environment.
+
+Dependabot checks npm and GitHub Actions dependencies weekly. Compatible minor
+and patch updates are grouped to keep maintenance PRs focused.
