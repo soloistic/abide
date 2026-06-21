@@ -8,6 +8,7 @@ import { FRUITS } from "@/lib/fruits";
 import { prisma } from "@/lib/prisma";
 
 const reflectionSchema = z.object({
+  focusFruit: z.union([z.enum(FRUITS), z.literal("")]),
   journalText: z
     .string()
     .trim()
@@ -25,27 +26,43 @@ const reflectionSchema = z.object({
     .trim()
     .min(5, "Share a little about what God is teaching you.")
     .max(5000, "Keep this reflection under 5,000 characters."),
+  prayerNote: z
+    .string()
+    .trim()
+    .max(5000, "Keep this prayer note under 5,000 characters."),
 });
 
 export type ReflectionFormState = {
   message?: string;
   errors?: Partial<
-    Record<"journalText" | "fruits" | "scriptureRef" | "lessonLearned", string[]>
+    Record<
+      | "focusFruit"
+      | "journalText"
+      | "fruits"
+      | "scriptureRef"
+      | "lessonLearned"
+      | "prayerNote",
+      string[]
+    >
   >;
   values?: {
+    focusFruit: string;
     journalText: string;
     fruits: string[];
     scriptureRef: string;
     lessonLearned: string;
+    prayerNote: string;
   };
 };
 
 function getReflectionValues(formData: FormData) {
   return {
+    focusFruit: String(formData.get("focusFruit") ?? ""),
     journalText: String(formData.get("journalText") ?? ""),
     fruits: formData.getAll("fruits").map(String),
     scriptureRef: String(formData.get("scriptureRef") ?? ""),
     lessonLearned: String(formData.get("lessonLearned") ?? ""),
+    prayerNote: String(formData.get("prayerNote") ?? ""),
   };
 }
 
@@ -70,10 +87,12 @@ export async function createReflection(
     const reflection = await prisma.fruitReflection.create({
       data: {
         reflectionDate: dateKeyToUtc(getDateKey()),
+        focusFruit: result.data.focusFruit || null,
         journalText: result.data.journalText,
         fruits: result.data.fruits,
         scriptureRef: result.data.scriptureRef || null,
         lessonLearned: result.data.lessonLearned,
+        prayerNote: result.data.prayerNote || null,
       },
     });
     reflectionId = reflection.id;
@@ -119,10 +138,12 @@ export async function updateReflection(
     await prisma.fruitReflection.update({
       where: { id },
       data: {
+        focusFruit: result.data.focusFruit || null,
         journalText: result.data.journalText,
         fruits: result.data.fruits,
         scriptureRef: result.data.scriptureRef || null,
         lessonLearned: result.data.lessonLearned,
+        prayerNote: result.data.prayerNote || null,
       },
     });
   } catch (error) {

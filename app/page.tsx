@@ -2,7 +2,10 @@ import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS } from "@/lib/fruits";
-import { countFruitTrends } from "@/lib/reflection-insights";
+import {
+  countFruitTrends,
+  selectGrowthHighlights,
+} from "@/lib/reflection-insights";
 import {
   getAllReflections,
   getRecentReflections,
@@ -20,6 +23,7 @@ export default async function Home() {
     getAllReflections(),
   ]);
   const fruitTrends = countFruitTrends(allReflections);
+  const growthHighlights = selectGrowthHighlights(allReflections);
   const highestCount = fruitTrends[0]?.count ?? 0;
 
   return (
@@ -74,6 +78,52 @@ export default async function Home() {
         >
           {todayReflection ? "Read today’s reflection" : "Reflect on today"}
         </Link>
+      </section>
+
+      <section className="highlights-section" aria-labelledby="highlights-heading">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Growth worth remembering</p>
+            <h2 id="highlights-heading">Highlights from your journey</h2>
+          </div>
+        </div>
+
+        {growthHighlights.length ? (
+          <div className="highlight-grid">
+            {growthHighlights.map(({ fruit, count, reflection }) => (
+              <Link
+                className="highlight-card"
+                href={`/reflections/${reflection.id}`}
+                key={fruit}
+              >
+                <p className="eyebrow">
+                  {FRUIT_LABELS[fruit]} keeps appearing
+                </p>
+                <h3>
+                  You have noticed {FRUIT_LABELS[fruit].toLowerCase()} in{" "}
+                  {count} reflections.
+                </h3>
+                <p>{excerpt(reflection.lessonLearned, 145)}</p>
+                <span>
+                  Revisit this reflection from{" "}
+                  {formatReflectionDate(reflection.reflectionDate, {
+                    day: "numeric",
+                    month: "short",
+                  })}{" "}
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h3>Growth becomes clearer in the looking back.</h3>
+            <p>
+              After a few reflections, meaningful patterns from your journey
+              will gather here.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="trends-section" aria-labelledby="trends-heading">

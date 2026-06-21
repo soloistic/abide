@@ -24,8 +24,10 @@ model FruitReflection {
   reflectionDate DateTime @unique @db.Date
   journalText    String
   fruits         Fruit[]
+  focusFruit     Fruit?
   scriptureRef   String?
   lessonLearned  String
+  prayerNote     String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

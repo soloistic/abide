@@ -38,10 +38,12 @@ export default async function EditReflectionPage({
       <ReflectionForm
         action={action}
         initialValues={{
+          focusFruit: reflection.focusFruit,
           journalText: reflection.journalText,
           fruits: reflection.fruits,
           scriptureRef: reflection.scriptureRef ?? "",
           lessonLearned: reflection.lessonLearned,
+          prayerNote: reflection.prayerNote ?? "",
         }}
         submitLabel="Update reflection"
         pendingLabel="Updating reflection…"
