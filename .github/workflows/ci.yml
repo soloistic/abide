@@ -16,13 +16,28 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, test, typecheck, and build
+    name: Lint, test, e2e, typecheck, and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: abide_e2e
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       # Prisma generation requires a syntactically valid URL. Database-backed
       # pages are request-rendered, so the build does not connect to this host.
       DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/abide
+      E2E_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/abide_e2e
       APP_TIME_ZONE: Europe/London
       NEXT_TELEMETRY_DISABLED: "1"
 
@@ -44,6 +59,12 @@ jobs:
 
       - name: Run unit tests
         run: npm test
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run route-level tests
+        run: npm run test:e2e
 
       - name: Typecheck
         run: npm run typecheck

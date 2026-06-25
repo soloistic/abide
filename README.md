@@ -85,6 +85,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 npm run lint
 npm test
+npm run test:e2e
 npm run typecheck
 npm run build
 npm run db:generate
@@ -92,6 +93,25 @@ npm run db:migrate
 npm run db:deploy
 npm run db:studio
 ```
+
+### Route-level tests
+
+The route-level lifecycle tests use Playwright with Chromium and a disposable
+PostgreSQL database. By default, `npm run test:e2e` uses
+`postgresql://$USER@localhost:5432/abide_e2e`, creates that database if the
+local role can connect to the `postgres` maintenance database, applies checked-in
+migrations with `prisma migrate deploy`, starts Next.js on
+`http://127.0.0.1:3001`, and clears reflection rows between tests.
+
+To use a different database, set `E2E_DATABASE_URL`:
+
+```bash
+E2E_DATABASE_URL=postgresql://user:password@localhost:5432/abide_e2e npm run test:e2e
+```
+
+The E2E database is intentionally separate from the development database because
+the tests create, edit, and delete reflections while exercising the real App
+Router pages, Server Actions, Prisma queries, and progressive-enhancement forms.
 
 ## Neon and Vercel
 
