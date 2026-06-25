@@ -117,9 +117,15 @@ export async function getFruitTrends() {
 export async function getGrowthHighlights(
   limit = 2,
 ): Promise<GrowthHighlight<GrowthHighlightRow>[]> {
+  if (limit < 1) return [];
+
   await connection();
   const rows = await prisma.$queryRaw<GrowthHighlightRow[]>`
-    WITH fruit_counts AS (
+    WITH total_reflections AS (
+      SELECT COUNT(*) AS count
+      FROM "FruitReflection"
+    ),
+    fruit_counts AS (
       SELECT fruit.value AS fruit, COUNT(*) AS count
       FROM "FruitReflection"
       CROSS JOIN LATERAL unnest("FruitReflection"."fruits") AS fruit(value)
@@ -144,10 +150,12 @@ export async function getGrowthHighlights(
     )
     SELECT fruit, count, id, "reflectionDate", fruits, "lessonLearned"
     FROM fruit_reflections
-    WHERE rank = 1
+    WHERE
+      rank <= ${limit}
+      AND (SELECT count FROM total_reflections) >= 3
   `;
 
-  return rows
+  const candidates = rows
     .filter((row): row is GrowthHighlightRow & { fruit: FruitValue } =>
       isFruitValue(row.fruit),
     )
@@ -156,8 +164,33 @@ export async function getGrowthHighlights(
       count: toNumber(row.count),
       reflection: row,
     }))
-    .sort((a, b) => b.count - a.count || fruitOrder(a.fruit) - fruitOrder(b.fruit))
-    .slice(0, limit);
+    .sort(
+      (a, b) =>
+        b.count - a.count ||
+        fruitOrder(a.fruit) - fruitOrder(b.fruit) ||
+        b.reflection.reflectionDate.getTime() -
+          a.reflection.reflectionDate.getTime(),
+    );
+  const selectedReflectionIds = new Set<string>();
+  const selectedFruits = new Set<FruitValue>();
+  const highlights: GrowthHighlight<GrowthHighlightRow>[] = [];
+
+  for (const candidate of candidates) {
+    if (
+      selectedFruits.has(candidate.fruit) ||
+      selectedReflectionIds.has(candidate.reflection.id)
+    ) {
+      continue;
+    }
+
+    highlights.push(candidate);
+    selectedFruits.add(candidate.fruit);
+    selectedReflectionIds.add(candidate.reflection.id);
+
+    if (highlights.length === limit) break;
+  }
+
+  return highlights;
 }
 
 export async function getTimelineReflections(
