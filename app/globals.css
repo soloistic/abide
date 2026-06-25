@@ -632,6 +632,93 @@ a {
   font-size: clamp(1rem, 2vw, 1.2rem);
 }
 
+.timeline-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 2rem;
+  border-block: 1px solid var(--line);
+  padding: 1.5rem 0;
+}
+
+.timeline-tools h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-cormorant), serif;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.timeline-filter-form {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(10rem, 0.7fr) minmax(9rem, 0.6fr);
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.timeline-filter-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.timeline-filter-form label > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.timeline-filter-form input,
+.timeline-filter-form select {
+  width: 100%;
+  min-height: 2.9rem;
+  border: 1px solid #cfd4ca;
+  border-radius: 0.8rem;
+  background: var(--paper);
+  padding: 0.7rem 0.85rem;
+  color: var(--ink);
+}
+
+.timeline-filter-form select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--sage-deep) 50%),
+    linear-gradient(135deg, var(--sage-deep) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) 50%,
+    calc(100% - 0.85rem) 50%;
+  background-repeat: no-repeat;
+  background-size: 0.3rem 0.3rem;
+  padding-right: 2.5rem;
+}
+
+.timeline-filter-form input:focus,
+.timeline-filter-form select:focus {
+  border-color: var(--sage-deep);
+  outline: 3px solid rgb(49 83 63 / 12%);
+}
+
+.timeline-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  grid-column: 1 / -1;
+}
+
+.timeline-results-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.timeline-results-heading p {
+  margin: 0;
+}
+
 .timeline {
   display: grid;
   gap: 4rem;
@@ -683,12 +770,41 @@ a {
   color: var(--muted);
 }
 
+.timeline-entry .rooted-in {
+  margin-top: 0.5rem;
+}
+
 .timeline-entry a {
   display: inline-block;
   margin-top: 0.85rem;
   color: var(--sage-deep);
   font-size: 0.82rem;
   font-weight: 750;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 750;
+}
+
+.pagination a {
+  color: var(--sage-deep);
+}
+
+.pagination a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.pagination span {
+  color: var(--muted);
+  opacity: 0.55;
 }
 
 .scripture-card p:last-child {
@@ -756,6 +872,16 @@ a {
 
   .trend-list {
     grid-template-columns: 1fr;
+  }
+
+  .timeline-tools,
+  .timeline-filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-results-heading,
+  .pagination {
+    flex-direction: column;
   }
 
   .timeline-month {

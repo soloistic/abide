@@ -2,24 +2,26 @@
 
 ## Current scope
 
-This implementation covers GitHub issues 2–11:
+This implementation covers GitHub issues 2–11 and 25–26:
 
 1. the `FruitReflection` Prisma model and initial PostgreSQL migration;
 2. the daily reflection form;
 3. today’s dashboard status;
-4. recent reflection history and detail pages.
+4. recent reflection history and detail pages;
 5. a month-grouped fruit timeline;
 6. reflective fruit-frequency trends;
 7. reflection editing and confirmed deletion;
 8. optional, human-written prompts for a selected fruit focus;
 9. optional prayer notes attached to reflections;
 10. dashboard growth highlights based on repeated fruit across at least three
-    reflections.
+    reflections;
+11. bounded dashboard and timeline reads for larger histories;
+12. gentle timeline search by reflection text, fruit, and month.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
-recognise completion, revisit their history, notice recurring fruit, receive
-gentle guidance, record a prayer, and amend or remove a reflection without
-turning the experience into a scorecard.
+recognise completion, revisit their history, find moments to return to, notice
+recurring fruit, receive gentle guidance, record a prayer, and amend or remove
+a reflection without turning the experience into a scorecard.
 
 ## Structure
 
@@ -66,6 +68,12 @@ PostgreSQL URL and Neon’s pooled connection URL. Vercel must receive:
 Use `prisma migrate deploy` for production migrations. Pages call Next.js
 `connection()` before database reads, keeping database work at request time
 instead of during Vercel’s build.
+
+Dashboard trend counts are aggregated in PostgreSQL by unnesting the fruit enum
+array, so the dashboard does not need to load every reflection body as history
+grows. The fruit timeline reads one page of summaries at a time and applies
+text, fruit, and month filters in the database from plain URL search
+parameters.
 
 ### Continuous integration
 

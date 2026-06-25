@@ -3,11 +3,8 @@ import { FruitTags } from "@/components/fruit-tags";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS } from "@/lib/fruits";
 import {
-  countFruitTrends,
-  selectGrowthHighlights,
-} from "@/lib/reflection-insights";
-import {
-  getAllReflections,
+  getFruitTrends,
+  getGrowthHighlights,
   getRecentReflections,
   getTodayReflection,
 } from "@/lib/reflections";
@@ -17,13 +14,13 @@ function excerpt(value: string, length = 150) {
 }
 
 export default async function Home() {
-  const [todayReflection, recentReflections, allReflections] = await Promise.all([
-    getTodayReflection(),
-    getRecentReflections(),
-    getAllReflections(),
-  ]);
-  const fruitTrends = countFruitTrends(allReflections);
-  const growthHighlights = selectGrowthHighlights(allReflections);
+  const [todayReflection, recentReflections, fruitTrends, growthHighlights] =
+    await Promise.all([
+      getTodayReflection(),
+      getRecentReflections(),
+      getFruitTrends(),
+      getGrowthHighlights(),
+    ]);
   const highestCount = fruitTrends[0]?.count ?? 0;
 
   return (
