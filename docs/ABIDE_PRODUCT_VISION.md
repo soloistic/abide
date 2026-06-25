@@ -66,7 +66,8 @@ Each reflection becomes part of a long-term record of spiritual growth and trans
 ## Future Features
 
 - Guided fruit focus
-- AI reflection companion
+- AI reflection companion, bounded by
+  [the companion guardrails](AI_REFLECTION_COMPANION.md)
 - Prayer integration
 - Testimony builder
 

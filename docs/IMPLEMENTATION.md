@@ -102,6 +102,9 @@ use Neon’s pooled connection string independently.
 
 - Language describes awareness and growth, never performance or holiness scores.
 - No streaks, rewards, or gamified completion mechanics.
+- AI companion work must follow
+  [`docs/AI_REFLECTION_COMPANION.md`](AI_REFLECTION_COMPANION.md) before any
+  provider integration or generated reflection copy is added.
 - The form works without client-side navigation and reports server validation
   errors in an `aria-live` region.
 - Color is not the only selected-state indicator; fruit choices also use borders
