@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { dateKeyToUtc, getDateKey } from "@/lib/dates";
 import { FRUITS } from "@/lib/fruits";
 import { prisma } from "@/lib/prisma";
@@ -70,6 +71,8 @@ export async function createReflection(
   _previousState: ReflectionFormState,
   formData: FormData,
 ): Promise<ReflectionFormState> {
+  await requireAuthenticatedUser();
+
   const values = getReflectionValues(formData);
   const result = reflectionSchema.safeParse(values);
 
@@ -123,6 +126,8 @@ export async function updateReflection(
   _previousState: ReflectionFormState,
   formData: FormData,
 ): Promise<ReflectionFormState> {
+  await requireAuthenticatedUser();
+
   const values = getReflectionValues(formData);
   const result = reflectionSchema.safeParse(values);
 
@@ -167,6 +172,8 @@ export async function updateReflection(
 }
 
 export async function deleteReflection(id: string) {
+  await requireAuthenticatedUser();
+
   try {
     await prisma.fruitReflection.delete({ where: { id } });
   } catch (error) {

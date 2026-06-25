@@ -29,6 +29,12 @@ export default defineConfig({
   webServer: {
     command: "npm run dev -- -H 127.0.0.1 -p 3001",
     env: {
+      ABIDE_AUTH_PASSWORD:
+        process.env.ABIDE_AUTH_PASSWORD || "abide-e2e-password",
+      ABIDE_AUTH_USERNAME: process.env.ABIDE_AUTH_USERNAME || "abide-e2e",
+      ABIDE_SESSION_SECRET:
+        process.env.ABIDE_SESSION_SECRET ||
+        "abide-e2e-session-secret-with-local-only-entropy",
       APP_TIME_ZONE: process.env.APP_TIME_ZONE || "Europe/London",
       DATABASE_URL: databaseUrl,
       NEXT_TELEMETRY_DISABLED: "1",

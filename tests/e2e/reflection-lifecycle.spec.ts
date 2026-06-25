@@ -7,6 +7,8 @@ const databaseUrl =
   process.env.DATABASE_URL ||
   `postgresql://${process.env.USER || "postgres"}@localhost:5432/abide_e2e`;
 const appTimeZone = process.env.APP_TIME_ZONE || "Europe/London";
+const e2eUsername = process.env.ABIDE_AUTH_USERNAME || "abide-e2e";
+const e2ePassword = process.env.ABIDE_AUTH_PASSWORD || "abide-e2e-password";
 
 function dateKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -45,6 +47,14 @@ async function withDatabase<T>(callback: (client: Client) => Promise<T>) {
 
 async function resetReflections() {
   await withDatabase((client) => client.query('DELETE FROM "FruitReflection"'));
+}
+
+async function signIn(page: Page, next = "/") {
+  await page.goto(`/login?next=${encodeURIComponent(next)}`);
+  await page.locator('input[name="username"]').fill(e2eUsername);
+  await page.locator('input[name="password"]').fill(e2ePassword);
+  await page.getByRole("button", { name: "Open journal" }).click();
+  await expect(page).toHaveURL(next);
 }
 
 async function seedTodayReflection() {
@@ -103,6 +113,9 @@ test("covers the reflection lifecycle across routes and server actions", async (
   page,
 }) => {
   await page.goto("/");
+  await expect(page).toHaveURL(/\/login\?next=%2F$/);
+
+  await signIn(page);
 
   await expect(
     page.getByRole("heading", { name: "How is God changing you?" }),
@@ -230,7 +243,7 @@ test.describe("without client-side JavaScript", () => {
   test("saves a reflection through the progressive-enhancement form", async ({
     page,
   }) => {
-    await page.goto("/reflections/new");
+    await signIn(page, "/reflections/new");
     await fillReflectionForm(page, {
       journalText: "Peace was present while I made room to listen today.",
       lessonLearned: "God is teaching me to stay attentive in ordinary moments.",

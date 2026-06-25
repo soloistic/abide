@@ -91,14 +91,20 @@ a {
 }
 
 .header-nav a,
+.header-button,
 .header-link,
 .text-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
   color: var(--sage-deep);
   font-size: 0.85rem;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .header-nav a:hover,
+.header-button:hover,
 .header-link:hover,
 .text-link:hover {
   text-decoration: underline;
@@ -832,6 +838,69 @@ a {
 
 .empty-state .button {
   margin-top: 1rem;
+}
+
+.login-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.login-panel {
+  width: min(100%, 28rem);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--paper);
+  padding: clamp(1.5rem, 6vw, 2.5rem);
+  box-shadow: var(--shadow);
+}
+
+.login-panel h1 {
+  margin: 0.2rem 0 0.8rem;
+  font-family: var(--font-cormorant), serif;
+  font-size: clamp(2.6rem, 8vw, 4.2rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.login-panel > p:not(.eyebrow) {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+.login-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.login-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.login-form label > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.login-form input {
+  width: 100%;
+  border: 1px solid #cfd4ca;
+  border-radius: 0.8rem;
+  background: #fff;
+  padding: 0.85rem 1rem;
+  color: var(--ink);
+}
+
+.login-form input:focus {
+  border-color: var(--sage-deep);
+  outline: 3px solid rgb(49 83 63 / 12%);
+}
+
+.login-form code {
+  font-size: 0.78em;
 }
 
 @media (max-width: 700px) {

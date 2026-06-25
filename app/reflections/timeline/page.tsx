@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
+import { LogoutForm } from "@/components/logout-form";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS, FRUITS } from "@/lib/fruits";
 import { groupReflectionsByMonth } from "@/lib/reflection-insights";
@@ -43,9 +44,12 @@ export default async function TimelinePage({
         <Link className="wordmark" href="/">
           Abide
         </Link>
-        <Link className="header-link" href="/">
-          Dashboard
-        </Link>
+        <nav className="header-nav" aria-label="Primary navigation">
+          <Link className="header-link" href="/">
+            Dashboard
+          </Link>
+          <LogoutForm />
+        </nav>
       </header>
 
       <header className="timeline-heading">
