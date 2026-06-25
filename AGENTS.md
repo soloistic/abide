@@ -78,5 +78,13 @@ npm run build
 Add or update Vitest coverage for pure logic. Async Server Components are better
 covered by an end-to-end test when that test layer is introduced.
 
+## Pull request handoff
+
+After the requested changes are implemented and the local verification checks
+pass, publish the work unless the user explicitly asks not to. Create or switch
+to an appropriate `codex/` branch, stage only the intended files, commit, push to
+GitHub, and open a draft pull request that summarizes the change and the checks
+that passed.
+
 Use the repository skill at `.agents/skills/develop-abide/SKILL.md` for the
 short implementation workflow.

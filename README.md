@@ -39,6 +39,12 @@ PostgreSQL user:
 cp .env.example .env.local
 ```
 
+The example file is safe to commit because it contains placeholders only.
+`DATABASE_URL` must be a PostgreSQL connection string, and `APP_TIME_ZONE`
+sets the calendar day used for “today.” Abide is currently a single-user,
+PostgreSQL-backed app, so the local database does not need account or ownership
+tables.
+
 Install, migrate, and run:
 
 ```bash
@@ -48,6 +54,31 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Environment files and database URLs
+
+- Local development: copy `.env.example` to `.env.local` and point
+  `DATABASE_URL` at a local PostgreSQL database such as `abide`. `.env.local`
+  stays out of Git.
+- CI and build-only checks: use a syntactically valid placeholder PostgreSQL URL
+  such as `postgresql://ci:ci@127.0.0.1:5432/abide`. Prisma needs the URL shape
+  during client generation, but the build should not require a live database.
+- Production Vercel runtime: use Neon’s pooled PostgreSQL URL for the Vercel
+  project `DATABASE_URL`.
+- Production migrations: use Neon’s direct, unpooled PostgreSQL URL for the
+  GitHub `production` environment secret consumed by `npm run db:deploy`.
+
+### Prisma troubleshooting
+
+- If `npm install`, `npm run db:generate`, or a Prisma command says
+  `DATABASE_URL` is missing, copy `.env.example` to `.env.local` or export
+  `DATABASE_URL` before running the command. `prisma.config.ts` loads
+  `.env.local` when the variable is not already set.
+- If Prisma rejects the connection string, make sure it starts with
+  `postgresql://` or `postgres://` and includes a database name.
+- If `npm run db:migrate` cannot connect locally, confirm PostgreSQL is running,
+  the `abide` database exists, and the user/password in `.env.local` match your
+  local PostgreSQL role.
 
 ## Useful commands
 
