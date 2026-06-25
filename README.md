@@ -41,9 +41,11 @@ cp .env.example .env.local
 
 The example file is safe to commit because it contains placeholders only.
 `DATABASE_URL` must be a PostgreSQL connection string, and `APP_TIME_ZONE`
-sets the calendar day used for “today.” Abide is currently a single-user,
-PostgreSQL-backed app, so the local database does not need account or ownership
-tables.
+sets the calendar day used for “today.” `ABIDE_AUTH_USERNAME`,
+`ABIDE_AUTH_PASSWORD`, and `ABIDE_SESSION_SECRET` protect the journal with a
+single-user login. There is no email provider or paid auth service involved.
+Abide is still a single-user, PostgreSQL-backed app, so the local database does
+not need account or ownership tables.
 
 Install, migrate, and run:
 
@@ -64,7 +66,8 @@ Open [http://localhost:3000](http://localhost:3000).
   such as `postgresql://ci:ci@127.0.0.1:5432/abide`. Prisma needs the URL shape
   during client generation, but the build should not require a live database.
 - Production Vercel runtime: use Neon’s pooled PostgreSQL URL for the Vercel
-  project `DATABASE_URL`.
+  project `DATABASE_URL`. Also add `APP_TIME_ZONE`, `ABIDE_AUTH_USERNAME`,
+  `ABIDE_AUTH_PASSWORD`, and a long random `ABIDE_SESSION_SECRET`.
 - Production migrations: use Neon’s direct, unpooled PostgreSQL URL for the
   GitHub `production` environment secret consumed by `npm run db:deploy`.
 
@@ -116,7 +119,9 @@ Router pages, Server Actions, Prisma queries, and progressive-enhancement forms.
 ## Neon and Vercel
 
 1. Create a Neon project and copy its pooled PostgreSQL connection string.
-2. Add `DATABASE_URL` and `APP_TIME_ZONE` to the Vercel project environments.
+2. Add `DATABASE_URL`, `APP_TIME_ZONE`, `ABIDE_AUTH_USERNAME`,
+   `ABIDE_AUTH_PASSWORD`, and `ABIDE_SESSION_SECRET` to the Vercel project
+   environments.
 3. In GitHub, create an environment named `production`.
 4. Add a `DATABASE_URL` environment secret containing Neon’s direct, unpooled
    connection string. Add required reviewers to the environment if migrations

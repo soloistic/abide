@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
+import { LogoutForm } from "@/components/logout-form";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS } from "@/lib/fruits";
 import {
@@ -31,6 +32,7 @@ export default async function Home() {
         </Link>
         <nav className="header-nav" aria-label="Primary navigation">
           <Link href="/reflections/timeline">Fruit timeline</Link>
+          <LogoutForm />
           <span>A quiet record of transformation</span>
         </nav>
       </header>

@@ -16,7 +16,9 @@ This implementation covers GitHub issues 2–11 and 25–26:
 10. dashboard growth highlights based on repeated fruit across at least three
     reflections;
 11. bounded dashboard and timeline reads for larger histories;
-12. gentle timeline search by reflection text, fruit, and month.
+12. gentle timeline search by reflection text, fruit, and month;
+13. a single-user login protecting the journal without requiring an email
+    provider or external auth service.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
 recognise completion, revisit their history, find moments to return to, notice
@@ -34,6 +36,19 @@ a reflection without turning the experience into a scorecard.
 Database reads stay in Server Components. Mutations use Server Actions with Zod
 validation and accessible progressive-enhancement states.
 
+## Authentication
+
+Abide uses a narrow single-user login for the current public deployment. The
+configured username and password live in environment variables, and successful
+login creates a signed, HTTP-only session cookie. Next.js Proxy redirects
+unauthenticated requests to `/login`, while reflection Server Actions also call
+the server-side auth guard because Server Functions are directly reachable by
+POST.
+
+This does not add account ownership to reflections. The data remains
+single-user, by design, until a future issue introduces multi-user accounts and
+the required `(userId, reflectionDate)` uniqueness change.
+
 ## Data model
 
 `FruitReflection.reflectionDate` is a PostgreSQL `DATE` with a unique constraint.
@@ -43,9 +58,8 @@ Fruit focus and prayer notes are nullable so reflections created before these
 features remain valid. Prompts live in application code rather than the
 database, keeping the first version simple and editable by the product team.
 
-The MVP is deliberately single-user because authentication and account ownership
-are not part of the current issue set. Before adding authentication, add a user
-relation and change the unique constraint to `(userId, reflectionDate)`.
+The MVP is deliberately single-user. Before adding multi-user accounts, add a
+user relation and change the unique constraint to `(userId, reflectionDate)`.
 
 ## Dates and timezones
 
@@ -63,7 +77,10 @@ Prisma uses the PostgreSQL driver adapter, which works with a standard local
 PostgreSQL URL and Neon’s pooled connection URL. Vercel must receive:
 
 - `DATABASE_URL`: the pooled Neon PostgreSQL URL;
-- `APP_TIME_ZONE`: the timezone used for “today”.
+- `APP_TIME_ZONE`: the timezone used for “today”;
+- `ABIDE_AUTH_USERNAME`: the one username allowed to open the journal;
+- `ABIDE_AUTH_PASSWORD`: the private password for that username;
+- `ABIDE_SESSION_SECRET`: a long random value used to sign session cookies.
 
 Use `prisma migrate deploy` for production migrations. Pages call Next.js
 `connection()` before database reads, keeping database work at request time
