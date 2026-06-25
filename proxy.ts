@@ -20,8 +20,10 @@ export async function proxy(request: NextRequest) {
 
   const loginUrl = new URL("/login", request.url);
   loginUrl.searchParams.set("next", `${pathname}${search}`);
+  const redirectStatus =
+    request.method === "GET" || request.method === "HEAD" ? 307 : 303;
 
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.redirect(loginUrl, redirectStatus);
 }
 
 export const config = {

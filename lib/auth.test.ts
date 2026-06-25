@@ -4,6 +4,7 @@ import {
   createSessionToken,
   verifySessionToken,
 } from "./session";
+import { safeNextPath } from "./redirects";
 
 const env = process.env;
 
@@ -49,5 +50,24 @@ describe("auth sessions", () => {
     expect(constantTimeEqual("solo", "solo")).toBe(true);
     expect(constantTimeEqual("solo", "sol")).toBe(false);
     expect(constantTimeEqual("solo", "else")).toBe(false);
+  });
+});
+
+describe("login redirects", () => {
+  it("allows local paths and rejects external or login destinations", () => {
+    expect(safeNextPath("/")).toBe("/");
+    expect(safeNextPath("/reflections/new?q=peace")).toBe(
+      "/reflections/new?q=peace",
+    );
+    expect(safeNextPath("https://example.com")).toBe("/");
+    expect(safeNextPath("//evil.example")).toBe("/");
+    expect(safeNextPath("/login?next=/reflections/new")).toBe("/");
+  });
+
+  it("rejects backslash and encoded separator redirects", () => {
+    expect(safeNextPath("/\\evil.example")).toBe("/");
+    expect(safeNextPath("/%5Cevil.example")).toBe("/");
+    expect(safeNextPath("/%2Fevil.example")).toBe("/");
+    expect(safeNextPath("/%255Cevil.example")).toBe("/");
   });
 });

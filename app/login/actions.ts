@@ -11,6 +11,7 @@ import {
   sessionCookieOptions,
   SESSION_COOKIE_NAME,
 } from "@/lib/auth";
+import { safeNextPath } from "@/lib/redirects";
 
 const loginSchema = z.object({
   next: z.string().default("/"),
@@ -24,13 +25,6 @@ export type LoginFormState = {
     username: string;
   };
 };
-
-function safeNextPath(value: string) {
-  if (!value.startsWith("/") || value.startsWith("//")) return "/";
-  if (value.startsWith("/login")) return "/";
-
-  return value;
-}
 
 export async function login(
   _previousState: LoginFormState,
