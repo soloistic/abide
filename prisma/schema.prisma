@@ -33,3 +33,15 @@ model FruitReflection {
 
   @@index([reflectionDate(sort: Desc)])
 }
+
+model TestimonyDraft {
+  id            String   @id @default(cuid())
+  title         String
+  theme         String?
+  body          String
+  reflectionIds String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([updatedAt(sort: Desc)])
+}

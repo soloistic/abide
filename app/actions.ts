@@ -7,6 +7,12 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 import { dateKeyToUtc, getDateKey } from "@/lib/dates";
 import { FRUITS } from "@/lib/fruits";
 import { prisma } from "@/lib/prisma";
+import {
+  buildTestimonyDraft,
+  TESTIMONY_DELETE_CONFIRM_VALUE,
+  testimonyDraftSchema,
+  testimonySelectionSchema,
+} from "@/lib/testimony";
 
 const reflectionSchema = z.object({
   focusFruit: z.union([z.enum(FRUITS), z.literal("")]),
@@ -188,4 +194,150 @@ export async function deleteReflection(id: string) {
   revalidatePath("/");
   revalidatePath("/reflections/timeline");
   redirect("/");
+}
+
+export type TestimonyNewFormState = {
+  message?: string;
+  errors?: Partial<Record<"theme" | "reflectionIds", string[]>>;
+  values?: {
+    theme: string;
+    reflectionIds: string[];
+  };
+};
+
+export async function createTestimony(
+  _previousState: TestimonyNewFormState,
+  formData: FormData,
+): Promise<TestimonyNewFormState> {
+  await requireAuthenticatedUser();
+
+  const values = {
+    theme: String(formData.get("theme") ?? ""),
+    reflectionIds: formData.getAll("reflectionIds").map(String),
+  };
+  const result = testimonySelectionSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: "A few details need your attention.",
+      errors: result.error.flatten().fieldErrors,
+      values,
+    };
+  }
+
+  const sources = await prisma.fruitReflection.findMany({
+    where: { id: { in: result.data.reflectionIds } },
+  });
+
+  if (sources.length !== result.data.reflectionIds.length) {
+    return {
+      message: "One of the chosen reflections could not be found.",
+      values,
+    };
+  }
+
+  const draft = buildTestimonyDraft(result.data.theme, sources);
+  const theme = result.data.theme.trim();
+
+  let testimonyId: string;
+
+  try {
+    const testimony = await prisma.testimonyDraft.create({
+      data: {
+        title: draft.title,
+        theme: theme || null,
+        body: draft.body,
+        reflectionIds: result.data.reflectionIds,
+      },
+    });
+    testimonyId = testimony.id;
+  } catch (error) {
+    console.error("Unable to gather testimony draft", error);
+    return {
+      message: "We couldn’t gather your draft. Please try again.",
+      values,
+    };
+  }
+
+  revalidatePath("/testimonies");
+  redirect(`/testimonies/${testimonyId}`);
+}
+
+export type TestimonyEditFormState = {
+  message?: string;
+  errors?: Partial<Record<"title" | "body", string[]>>;
+  values?: {
+    title: string;
+    body: string;
+  };
+};
+
+export async function updateTestimony(
+  id: string,
+  _previousState: TestimonyEditFormState,
+  formData: FormData,
+): Promise<TestimonyEditFormState> {
+  await requireAuthenticatedUser();
+
+  const values = {
+    title: String(formData.get("title") ?? ""),
+    body: String(formData.get("body") ?? ""),
+  };
+  const result = testimonyDraftSchema.safeParse(values);
+
+  if (!result.success) {
+    return {
+      message: "A few details need your attention.",
+      errors: result.error.flatten().fieldErrors,
+      values,
+    };
+  }
+
+  try {
+    await prisma.testimonyDraft.update({
+      where: { id },
+      data: {
+        title: result.data.title,
+        body: result.data.body,
+      },
+    });
+  } catch (error) {
+    const knownError = error as { code?: string };
+
+    if (knownError.code === "P2025") {
+      return { message: "This draft could not be found." };
+    }
+
+    console.error("Unable to update testimony draft", error);
+    return {
+      message: "We couldn’t save your draft. Please try again.",
+      values,
+    };
+  }
+
+  revalidatePath("/testimonies");
+  revalidatePath(`/testimonies/${id}`);
+  redirect(`/testimonies/${id}`);
+}
+
+export async function deleteTestimony(id: string, formData: FormData) {
+  await requireAuthenticatedUser();
+
+  if (formData.get("confirm") !== TESTIMONY_DELETE_CONFIRM_VALUE) {
+    redirect(`/testimonies/${id}/delete`);
+  }
+
+  try {
+    await prisma.testimonyDraft.delete({ where: { id } });
+  } catch (error) {
+    const knownError = error as { code?: string };
+
+    if (knownError.code !== "P2025") {
+      console.error("Unable to delete testimony draft", error);
+      throw new Error("Unable to delete testimony draft.");
+    }
+  }
+
+  revalidatePath("/testimonies");
+  redirect("/testimonies");
 }

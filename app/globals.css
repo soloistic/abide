@@ -591,6 +591,62 @@ a {
   outline-offset: 3px;
 }
 
+.choice-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.choice-list label {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  border: 1px solid var(--input-border);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--input-surface);
+  cursor: pointer;
+}
+
+.choice-list label:has(input:checked) {
+  border-color: var(--sage-deep);
+  background: var(--sage);
+}
+
+.choice-list input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  accent-color: var(--sage-deep);
+}
+
+.choice-list label > div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.choice-list label strong {
+  font-size: 0.85rem;
+}
+
+.choice-list label .fruit-tags {
+  margin: 0;
+}
+
+.choice-list label span:last-child {
+  color: var(--today-text);
+  font-size: 0.88rem;
+}
+
+.field-label {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .field-error,
 .form-message {
   color: var(--danger-strong);
