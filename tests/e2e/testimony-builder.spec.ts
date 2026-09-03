@@ -110,7 +110,9 @@ test("gathers reflections into an editable private draft", async ({
   await expect(
     page.getByRole("heading", { name: "Linked reflections" }),
   ).toBeVisible();
-  await expect(page.getByText("God is teaching me to listen")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /God is teaching me to listen/ }),
+  ).toBeVisible();
 
   await page.locator('input[name="title"]').fill("A story of listening");
   await page
