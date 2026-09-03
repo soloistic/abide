@@ -2,7 +2,7 @@
 
 ## Current scope
 
-This implementation covers GitHub issues 2–11 and 25–27:
+This implementation covers GitHub issues 2–11 and 25–28:
 
 1. the `FruitReflection` Prisma model and initial PostgreSQL migration;
 2. the daily reflection form;
@@ -21,6 +21,10 @@ This implementation covers GitHub issues 2–11 and 25–27:
     provider or external auth service.
 14. private testimony drafts gathered from a small set of reflections, with an
     editable starting structure and links back to the source reflections.
+15. a prayer gathering view that lists prayer notes independently from
+    reflections, with a gentle invitation to revisit one older prayer and an
+    empty state for users with no prayer notes yet. No answered/continuing
+    status was added, to avoid completion or productivity language.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
 recognise completion, revisit their history, find moments to return to, notice

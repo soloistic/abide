@@ -705,6 +705,35 @@ a {
   margin: 0.5rem 0 0;
 }
 
+.prayer-invitation {
+  border: 1px solid var(--highlight-border);
+  border-radius: 1.25rem;
+  padding: clamp(1.3rem, 4vw, 2rem);
+  background: var(--highlight-surface);
+  box-shadow: var(--shadow);
+}
+
+.prayer-invitation h2 {
+  margin: 0.5rem 0 0.75rem;
+  font-family: var(--font-cormorant), serif;
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  line-height: 1.1;
+}
+
+.prayer-invitation .prose-copy {
+  margin: 0 0 0.75rem;
+  white-space: pre-wrap;
+}
+
+.prayer-invitation > p:last-of-type {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.prayers-section {
+  padding-top: 3rem;
+}
+
 .reflection-actions {
   display: flex;
   flex-wrap: wrap;

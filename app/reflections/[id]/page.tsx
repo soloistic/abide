@@ -58,6 +58,11 @@ export default async function ReflectionDetailPage({
           <section className="prayer-card">
             <p className="eyebrow">A prayer from this reflection</p>
             <p className="prose-copy">{reflection.prayerNote}</p>
+            <p>
+              <Link className="text-link" href="/prayers">
+                Return to all prayers →
+              </Link>
+            </p>
           </section>
         ) : null}
 

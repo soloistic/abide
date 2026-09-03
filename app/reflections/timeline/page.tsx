@@ -48,6 +48,9 @@ export default async function TimelinePage({
           <Link className="header-link" href="/">
             Dashboard
           </Link>
+          <Link className="header-link" href="/prayers">
+            Prayers
+          </Link>
           <Link className="header-link" href="/testimonies">
             Testimonies
           </Link>
