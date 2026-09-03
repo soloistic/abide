@@ -221,8 +221,15 @@ test("covers the reflection lifecycle across routes and server actions", async (
   await expect(page.getByText("Updated: love and peace")).toBeVisible();
 
   await page.goto(detailUrl);
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "Delete reflection" }).click();
+  await page.getByRole("link", { name: "Delete reflection" }).click();
+
+  await expect(page).toHaveURL(/\/reflections\/[^/]+\/delete$/);
+  await expect(
+    page.getByRole("heading", { name: "Let go of this reflection?" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Yes, delete this reflection" })
+    .click();
 
   await expect(page).toHaveURL("/");
   await expect(
@@ -255,5 +262,18 @@ test.describe("without client-side JavaScript", () => {
       page.getByRole("heading", { name: "A moment of growth." }),
     ).toBeVisible();
     await expect(page.getByText("Peace was present")).toBeVisible();
+
+    await page.getByRole("link", { name: "Delete reflection" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Let go of this reflection?" }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Yes, delete this reflection" })
+      .click();
+
+    await expect(page).toHaveURL("/");
+    await expect(
+      page.getByRole("heading", { name: "Your reflection is still open." }),
+    ).toBeVisible();
   });
 });
