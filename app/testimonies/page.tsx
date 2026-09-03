@@ -28,6 +28,9 @@ export default async function TestimoniesPage() {
           <Link className="header-link" href="/reflections/timeline">
             Fruit timeline
           </Link>
+          <Link className="header-link" href="/prayers">
+            Prayers
+          </Link>
           <LogoutForm />
         </nav>
       </header>

@@ -125,6 +125,7 @@ export async function createReflection(
 
   revalidatePath("/");
   revalidatePath("/reflections/timeline");
+  revalidatePath("/prayers");
   redirect(`/reflections/${reflectionId}`);
 }
 
@@ -174,6 +175,7 @@ export async function updateReflection(
 
   revalidatePath("/");
   revalidatePath("/reflections/timeline");
+  revalidatePath("/prayers");
   revalidatePath(`/reflections/${id}`);
   redirect(`/reflections/${id}`);
 }
@@ -198,6 +200,7 @@ export async function deleteReflection(id: string, formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/reflections/timeline");
+  revalidatePath("/prayers");
   redirect("/");
 }
 

@@ -32,6 +32,7 @@ export default async function Home() {
         </Link>
         <nav className="header-nav" aria-label="Primary navigation">
           <Link href="/reflections/timeline">Fruit timeline</Link>
+          <Link href="/prayers">Prayers</Link>
           <Link href="/testimonies">Testimonies</Link>
           <LogoutForm />
           <span>A quiet record of transformation</span>
