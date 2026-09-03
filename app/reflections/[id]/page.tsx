@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DeleteReflectionForm } from "@/components/delete-reflection-form";
 import { FruitTags } from "@/components/fruit-tags";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS } from "@/lib/fruits";
@@ -69,7 +68,12 @@ export default async function ReflectionDetailPage({
           >
             Edit reflection
           </Link>
-          <DeleteReflectionForm id={reflection.id} />
+          <Link
+            className="button button-danger"
+            href={`/reflections/${reflection.id}/delete`}
+          >
+            Delete reflection
+          </Link>
         </footer>
       </article>
     </main>

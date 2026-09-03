@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { dateKeyToUtc, getDateKey } from "@/lib/dates";
+import { isDeleteConfirmed } from "@/lib/delete-confirmation";
 import { FRUITS } from "@/lib/fruits";
 import { prisma } from "@/lib/prisma";
 
@@ -171,8 +172,12 @@ export async function updateReflection(
   redirect(`/reflections/${id}`);
 }
 
-export async function deleteReflection(id: string) {
+export async function deleteReflection(id: string, formData: FormData) {
   await requireAuthenticatedUser();
+
+  if (!isDeleteConfirmed(formData.get("confirm"))) {
+    redirect(`/reflections/${id}/delete`);
+  }
 
   try {
     await prisma.fruitReflection.delete({ where: { id } });
