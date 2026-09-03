@@ -2,7 +2,7 @@
 
 ## Current scope
 
-This implementation covers GitHub issues 2–11 and 25–26:
+This implementation covers GitHub issues 2–11 and 25–27:
 
 1. the `FruitReflection` Prisma model and initial PostgreSQL migration;
 2. the daily reflection form;
@@ -19,6 +19,8 @@ This implementation covers GitHub issues 2–11 and 25–26:
 12. gentle timeline search by reflection text, fruit, and month;
 13. a single-user login protecting the journal without requiring an email
     provider or external auth service.
+14. private testimony drafts gathered from a small set of reflections, with an
+    editable starting structure and links back to the source reflections.
 
 These issues form one vertical slice: a person can write, persist, revisit, and
 recognise completion, revisit their history, find moments to return to, notice
