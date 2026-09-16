@@ -9,6 +9,10 @@ updates:
       time: "06:00"
       timezone: Europe/London
     open-pull-requests-limit: 10
+    reviewers:
+      - soloistic
+    assignees:
+      - soloistic
     commit-message:
       prefix: "chore(deps)"
     groups:
@@ -42,6 +46,10 @@ updates:
       time: "06:15"
       timezone: Europe/London
     open-pull-requests-limit: 5
+    reviewers:
+      - soloistic
+    assignees:
+      - soloistic
     commit-message:
       prefix: "chore(deps)"
     groups:
