@@ -129,6 +129,17 @@ Configure required reviewers on the GitHub environment when a human approval
 should gate production schema changes. The Vercel application can continue to
 use Neon’s pooled connection string independently.
 
+## Progressive web app
+
+Abide is installable: `app/manifest.ts` serves the web manifest, icons live
+in `public/icons/` with an `apple-touch-icon.png`, and the layout sets
+standalone display metadata. A hand-written `public/sw.js` (registered only
+in production builds) keeps navigations network-first with an `/offline`
+fallback and caches static assets; it handles same-origin GET requests only,
+so Server Action mutations are never cached or replayed. The proxy matcher
+leaves the service worker, manifest, and offline page public so installation
+and offline use never depend on a session cookie.
+
 ## Product and usability guardrails
 
 - Language describes awareness and growth, never performance or holiness scores.
