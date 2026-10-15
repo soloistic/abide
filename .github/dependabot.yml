@@ -37,6 +37,13 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # typescript-eslint (via eslint-config-next) does not support TypeScript 7
+      # (Go rewrite). CI fails with "typescript-eslint does not support TS 7.0".
+      # Revisit once upstream announces TS 7 support.
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: github-actions
     directory: /
