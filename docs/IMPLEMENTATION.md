@@ -168,20 +168,29 @@ the row. A test button sends a one-off notification to the current device so
 delivery can be checked without waiting for the evening.
 
 `/api/cron/daily-reminder` reads `CRON_SECRET` from the bearer token, confirms
-that the local hour is 20, and skips delivery if today’s reflection already
-exists. It then sends to subscriptions that have not received a reminder for
-that calendar date, records `lastReminderDate`, and deletes endpoints that the
-push service reports as expired. `vercel.json` invokes the endpoint at 19:00 and
-20:00 UTC daily; together those runs land on 8:00 pm local on both sides of
-British daylight saving time. Other timezones need their two UTC schedules
-adjusted to the same rule.
+that the local hour is one of the reminder hours in `lib/reminders.ts`, and
+skips delivery if today’s reflection already exists. It then sends to
+subscriptions that have not received a reminder for that calendar date,
+records `lastReminderDate`, and deletes endpoints that the push service
+reports as expired (404/410). Rejections caused by rotated VAPID keys
+(400/403) are logged rather than deleted: each device must turn the reminder
+off and on again to pick up the new keys, and the test button in Settings
+explains that.
+
+Vercel Hobby allows one daily cron job, so `vercel.json` invokes the endpoint
+once at 19:00 UTC: 8:00 pm during British Summer Time, 7:00 pm during GMT.
+Both local hours are accepted so a run delayed within its scheduled hour still
+delivers, and the recorded reminder date keeps a second matching run from
+sending twice. Other timezones should pick the UTC hour closest to their
+preferred evening hour and accept the matching local hours.
 
 The service worker handles `push` by showing a quiet notification and
-`notificationclick` by focusing an open Abide window or opening the reflection
-form. Notifications are never used for streaks, scores, or pressure. The cron
-route is excluded from the session proxy because it has its own secret, while
-the push subscribe, unsubscribe, and test actions require an authenticated
-session.
+`notificationclick` by opening the reflection form or another app URL. A
+window that may hold unsaved work—the reflection form, an edit or delete
+page, or a draft—is focused rather than navigated away from. Notifications
+are never used for streaks, scores, or pressure. The cron route is excluded
+from the session proxy because it has its own secret, while the push
+subscribe, unsubscribe, and test actions require an authenticated session.
 
 ## Product and usability guardrails
 

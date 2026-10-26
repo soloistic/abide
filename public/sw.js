@@ -6,8 +6,9 @@
  * - Only same-origin GET requests are handled. Mutations travel over POST
  *   through Server Actions and are never cached or replayed.
  * - Push notifications open the reflection form (or another app URL) when
- *   tapped. Development registrations skip request caching so local work is
- *   never served stale.
+ *   tapped. A window that may hold unsaved work is focused instead of
+ *   navigated away from. Development registrations skip request caching so
+ *   local work is never served stale.
  */
 
 const VERSION = "abide-v2";
@@ -141,6 +142,22 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
+// Routes where an in-progress form may hold unsaved work. Tapping a
+// notification must never navigate such a window away, because the journal's
+// forms submit with full page posts and nothing is autosaved.
+const UNSAVED_FORM_PATTERNS = [
+  /^\/reflections\/new$/,
+  /^\/reflections\/[^/]+\/(?:edit|delete)$/,
+  /^\/testimonies\/new$/,
+  /^\/testimonies\/[^/]+(?:\/delete)?$/,
+];
+
+function mayHoldUnsavedWork(clientUrl) {
+  const { pathname } = new URL(clientUrl, self.location.origin);
+
+  return UNSAVED_FORM_PATTERNS.some((pattern) => pattern.test(pathname));
+}
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -149,26 +166,42 @@ self.addEventListener("notificationclick", (event) => {
     notificationData && typeof notificationData.url === "string"
       ? notificationData.url
       : "/";
-  const target = new URL(path, self.location.origin).href;
+  const target = new URL(path, self.location.origin);
+  const targetPath = target.pathname;
 
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        for (const client of clientList) {
-          if (!client.url.startsWith(self.location.origin)) continue;
+        const sameOrigin = clientList.filter((client) =>
+          client.url.startsWith(self.location.origin),
+        );
 
-          if ("navigate" in client) {
-            return client
-              .navigate(target)
-              .then((navigated) => (navigated || client).focus())
-              .catch(() => self.clients.openWindow(target));
-          }
+        // A window already showing the destination only needs to come forward.
+        const alreadyOnTarget = sameOrigin.find(
+          (client) =>
+            new URL(client.url, self.location.origin).pathname === targetPath,
+        );
 
-          return client.focus();
+        if (alreadyOnTarget) return alreadyOnTarget.focus();
+
+        // Prefer a window that can be moved without risking unsaved work.
+        const movable = sameOrigin.find(
+          (client) =>
+            !mayHoldUnsavedWork(client.url) && "navigate" in client,
+        );
+
+        if (movable) {
+          return movable
+            .navigate(target.href)
+            .then((navigated) => (navigated || movable).focus())
+            .catch(() => self.clients.openWindow(target.href));
         }
 
-        return self.clients.openWindow(target);
+        // Every open window may hold unsaved work; bring it forward as-is.
+        if (sameOrigin.length) return sameOrigin[0].focus();
+
+        return self.clients.openWindow(target.href);
       }),
   );
 });

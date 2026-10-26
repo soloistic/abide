@@ -43,11 +43,22 @@ export async function getPushSubscription(endpoint: string) {
 }
 
 export async function getReminderSubscriptionsDue(reminderDate: Date) {
+  const now = new Date();
+
   return prisma.pushSubscription.findMany({
     where: {
-      OR: [
-        { lastReminderDate: null },
-        { lastReminderDate: { not: reminderDate } },
+      AND: [
+        {
+          OR: [
+            { lastReminderDate: null },
+            { lastReminderDate: { not: reminderDate } },
+          ],
+        },
+        {
+          // Expired subscriptions only clean up when the push service reports
+          // them as gone; leave them out of the delivery run meanwhile.
+          OR: [{ expirationTime: null }, { expirationTime: { gt: now } }],
+        },
       ],
     },
   });

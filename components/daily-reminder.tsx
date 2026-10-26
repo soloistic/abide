@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
 import {
   sendTestReminder,
   subscribeToDailyReminder,
   unsubscribeFromDailyReminder,
 } from "@/app/settings/actions";
+import { isNextRedirect } from "@/lib/next-redirect";
 import type { PushSubscriptionInput } from "@/lib/push-validation";
 import { registerAbideServiceWorker } from "@/lib/service-worker";
 
@@ -100,6 +103,7 @@ export function DailyReminder({
   pushConfigured,
   vapidPublicKey,
 }: DailyReminderProps) {
+  const router = useRouter();
   const [state, setState] = useState<ReminderState>(
     pushConfigured ? "checking" : "unconfigured",
   );
@@ -122,6 +126,8 @@ export function DailyReminder({
         return;
       }
 
+      let subscriptionInput: PushSubscriptionInput | null = null;
+
       try {
         if (Notification.permission === "denied") {
           if (!cancelled) setState("blocked");
@@ -138,19 +144,46 @@ export function DailyReminder({
           return;
         }
 
-        const input = toSubscriptionInput(subscription);
-        const result = await subscribeToDailyReminder(input);
+        subscriptionInput = toSubscriptionInput(subscription);
+      } catch (error) {
+        if (isNextRedirect(error)) {
+          router.replace("/login");
+          return;
+        }
+
+        if (!cancelled) setState("error");
+        return;
+      }
+
+      if (cancelled) return;
+
+      setEndpoint(subscriptionInput.endpoint);
+
+      // Re-saving the subscription keeps the stored keys current. The device
+      // already holds a browser subscription, so it stays enabled even when
+      // this confirmation cannot reach the server (for example while offline).
+      try {
+        const result = await subscribeToDailyReminder(subscriptionInput);
 
         if (cancelled) return;
 
-        setEndpoint(input.endpoint);
-        setState("enabled");
+        setState(result.success ? "enabled" : "available");
 
         if (!result.success) {
           setMessage(result.message);
         }
-      } catch {
-        if (!cancelled) setState("error");
+      } catch (error) {
+        if (cancelled) return;
+
+        if (isNextRedirect(error)) {
+          router.replace("/login");
+          return;
+        }
+
+        setState("enabled");
+        setMessage(
+          "We could not reach Abide just now. This device’s reminder should still arrive.",
+        );
       }
     }
 
@@ -159,7 +192,7 @@ export function DailyReminder({
     return () => {
       cancelled = true;
     };
-  }, [pushConfigured]);
+  }, [pushConfigured, router]);
 
   async function enableReminder() {
     if (isPending || !vapidPublicKey) return;
@@ -191,13 +224,19 @@ export function DailyReminder({
 
       await navigator.serviceWorker.ready;
 
+      // Subscribe afresh rather than reusing an existing subscription: one
+      // created under earlier VAPID keys can never receive a notification,
+      // and browsers refuse subscribe() called with a different key.
       const existing = await registration.pushManager.getSubscription();
-      const subscription =
-        existing ??
-        (await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        }));
+
+      if (existing) {
+        await existing.unsubscribe();
+      }
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      });
       const input = toSubscriptionInput(subscription);
       const result = await subscribeToDailyReminder(input);
 
@@ -210,8 +249,13 @@ export function DailyReminder({
       setEndpoint(input.endpoint);
       setState("enabled");
       setMessage("The evening reminder is on for this device.");
-    } catch {
-      setState("error");
+    } catch (error) {
+      if (isNextRedirect(error)) {
+        router.replace("/login");
+        return;
+      }
+
+      setState("available");
       setMessage("This device could not enable the reminder. Please try again.");
     } finally {
       setIsPending(false);
@@ -252,7 +296,12 @@ export function DailyReminder({
       setEndpoint(null);
       setState("available");
       setMessage(nextMessage);
-    } catch {
+    } catch (error) {
+      if (isNextRedirect(error)) {
+        router.replace("/login");
+        return;
+      }
+
       setMessage(
         "This device could not turn off the reminder. Please try again.",
       );
@@ -275,7 +324,12 @@ export function DailyReminder({
           ? "A test reminder was sent. It may take a moment to appear."
           : result.message,
       );
-    } catch {
+    } catch (error) {
+      if (isNextRedirect(error)) {
+        router.replace("/login");
+        return;
+      }
+
       setMessage("The test reminder could not be sent. Please try again later.");
     } finally {
       setIsPending(false);

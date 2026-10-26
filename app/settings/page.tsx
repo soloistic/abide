@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { connection } from "next/server";
 import { DailyReminder } from "@/components/daily-reminder";
 import { InstallApp } from "@/components/install-app";
-import { LogoutForm } from "@/components/logout-form";
+import { SiteHeader } from "@/components/site-header";
 import { getAppTimeZone } from "@/lib/dates";
 import { getPushPublicKey, pushIsConfigured } from "@/lib/push";
 
@@ -21,26 +20,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="page-shell narrow-shell">
-      <header className="site-header">
-        <Link className="wordmark" href="/">
-          Abide
-        </Link>
-        <nav className="header-nav" aria-label="Primary navigation">
-          <Link className="header-link" href="/">
-            Dashboard
-          </Link>
-          <Link className="header-link" href="/reflections/timeline">
-            Fruit timeline
-          </Link>
-          <Link className="header-link" href="/prayers">
-            Prayers
-          </Link>
-          <Link className="header-link" href="/testimonies">
-            Testimonies
-          </Link>
-          <LogoutForm />
-        </nav>
-      </header>
+      <SiteHeader currentHref="/settings" />
 
       <header className="timeline-heading">
         <p className="eyebrow">A quiet rhythm</p>

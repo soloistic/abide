@@ -1,6 +1,7 @@
 import { dateKeyToUtc } from "@/lib/dates";
 import {
   isPushSubscriptionGone,
+  isPushSubscriptionRejected,
   pushIsConfigured,
   sendPushNotification,
 } from "@/lib/push";
@@ -20,6 +21,10 @@ import { constantTimeEqual } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+// Web Push involves a few network round trips per device; leave room for a
+// slower provider instead of clipping the run at the default 10 seconds.
+export const maxDuration = 30;
 
 function unauthorized() {
   return new Response("Unauthorized", { status: 401 });
@@ -95,6 +100,16 @@ export async function GET(request: Request) {
           return "removed" as const;
         }
 
+        if (isPushSubscriptionRejected(error)) {
+          // Keep the row: after a VAPID key rotation the same endpoint can be
+          // re-saved with fresh keys once the device re-enables the reminder.
+          console.error(
+            "Daily reminder rejected for subscription; the device must re-enable it",
+            error,
+          );
+          return "rejected" as const;
+        }
+
         console.error("Unable to send daily reminder", error);
         return "failed" as const;
       }
@@ -105,6 +120,7 @@ export async function GET(request: Request) {
     dateKey,
     sent: results.filter((result) => result === "sent").length,
     removed: results.filter((result) => result === "removed").length,
+    rejected: results.filter((result) => result === "rejected").length,
     failed: results.filter((result) => result === "failed").length,
   });
 }

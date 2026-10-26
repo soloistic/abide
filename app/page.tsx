@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
-import { LogoutForm } from "@/components/logout-form";
+import { SiteHeader } from "@/components/site-header";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS } from "@/lib/fruits";
 import {
@@ -26,19 +26,7 @@ export default async function Home() {
 
   return (
     <main className="page-shell">
-      <header className="site-header">
-        <Link className="wordmark" href="/">
-          Abide
-        </Link>
-        <nav className="header-nav" aria-label="Primary navigation">
-          <Link href="/reflections/timeline">Fruit timeline</Link>
-          <Link href="/prayers">Prayers</Link>
-          <Link href="/testimonies">Testimonies</Link>
-          <Link href="/settings">Settings</Link>
-          <LogoutForm />
-          <span>A quiet record of transformation</span>
-        </nav>
-      </header>
+      <SiteHeader currentHref="/" tagline />
 
       <section className="hero">
         <p className="eyebrow">Your fruit reflection</p>

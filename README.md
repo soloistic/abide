@@ -83,12 +83,14 @@ want to use. Abide asks the browser for notification permission only when you
 choose to enable it. The reminder is skipped when today’s reflection already
 exists, and it can be turned off again from Settings.
 
-In production, `vercel.json` schedules the reminder endpoint twice a day at
-19:00 and 20:00 UTC. The endpoint only sends when it is 8:00 pm in
-`APP_TIME_ZONE`, so one of the two schedules covers each side of daylight
-saving time for `Europe/London`. If you use a different timezone, adjust the two
-UTC schedules to the two hours that can be 8:00 pm local across daylight
-saving changes.
+Vercel's Hobby plan allows one daily cron job, so `vercel.json` schedules the
+reminder endpoint once a day at 19:00 UTC. That lands on 8:00 pm during
+British Summer Time and 7:00 pm in winter (GMT). The endpoint accepts both
+local hours so a run delayed within its scheduled hour still delivers, and it
+records the reminder date so no device receives two reminders in one day. If
+you prefer a different balance, change the schedule in `vercel.json` and the
+accepted hours in `lib/reminders.ts`; other timezones should pick the UTC hour
+closest to their preferred evening time.
 
 Vercel automatically sends `Authorization: Bearer $CRON_SECRET` to cron
 requests when `CRON_SECRET` is set in the project environment. You can invoke
@@ -169,8 +171,9 @@ Router pages, Server Actions, Prisma queries, and progressive-enhancement forms.
    `ABIDE_AUTH_PASSWORD`, `ABIDE_SESSION_SECRET`,
    `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, and
    `CRON_SECRET` to the Vercel project environments.
-3. Confirm that `vercel.json` is part of the production deployment so the two
-   daily reminder cron jobs are registered.
+3. Confirm that `vercel.json` is part of the production deployment so the
+   daily reminder cron job is registered. Vercel's Hobby plan allows one
+   daily cron job, which is enough for this schedule.
 4. In GitHub, create an environment named `production`.
 5. Add a `DATABASE_URL` environment secret containing Neon’s direct, unpooled
    connection string. Add required reviewers to the environment if migrations

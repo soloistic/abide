@@ -9,6 +9,7 @@ import {
 } from "@/lib/push-subscriptions";
 import {
   isPushSubscriptionGone,
+  isPushSubscriptionRejected,
   pushIsConfigured,
   sendPushNotification,
 } from "@/lib/push";
@@ -113,6 +114,14 @@ export async function sendTestReminder(
       return {
         success: false,
         message: "This device’s reminder has expired. Turn the reminder off and on again.",
+      };
+    }
+
+    if (isPushSubscriptionRejected(error)) {
+      return {
+        success: false,
+        message:
+          "Abide could not reach this device with its current reminder keys. Turn the reminder off and on again.",
       };
     }
 

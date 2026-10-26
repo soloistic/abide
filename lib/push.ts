@@ -19,7 +19,16 @@ function getPushConfig(): PushConfig | null {
   const privateKey = process.env.VAPID_PRIVATE_KEY?.trim();
   const subject = process.env.VAPID_SUBJECT?.trim();
 
-  if (!publicKey || !privateKey || !subject) return null;
+  // web-push rejects a subject that is not a mailto: or https: URI at send
+  // time with a cryptic error, so treat a malformed value as unconfigured.
+  if (
+    !publicKey ||
+    !privateKey ||
+    !subject ||
+    !/^(?:mailto:|https:\/\/)/i.test(subject)
+  ) {
+    return null;
+  }
 
   return { publicKey, privateKey, subject };
 }
@@ -70,11 +79,27 @@ export async function sendPushNotification(
   );
 }
 
-export function isPushSubscriptionGone(error: unknown) {
-  if (!error || typeof error !== "object") return false;
+function pushErrorStatusCode(error: unknown) {
+  if (!error || typeof error !== "object") return Number.NaN;
 
   const statusCode =
     "statusCode" in error ? Number(error.statusCode) : Number.NaN;
 
+  return statusCode;
+}
+
+export function isPushSubscriptionGone(error: unknown) {
+  const statusCode = pushErrorStatusCode(error);
+
   return statusCode === 404 || statusCode === 410;
+}
+
+// The push service refused the request: the stored keys no longer match the
+// configured VAPID keys (after a key rotation) or the subscription payload is
+// malformed. The row is kept so the same endpoint can be re-saved once the
+// device subscribes again, but it needs to be re-enabled by the user.
+export function isPushSubscriptionRejected(error: unknown) {
+  const statusCode = pushErrorStatusCode(error);
+
+  return statusCode === 400 || statusCode === 403;
 }

@@ -22,13 +22,11 @@ const nextConfig: NextConfig = {
       },
       {
         // Service workers check for updates on every navigation, so the
-        // worker script itself must never be served stale.
+        // worker script itself must never be served stale. Next serves the
+        // public file with the correct Content-Type already; adding one here
+        // risks a duplicate header that would fail the worker MIME check.
         source: "/sw.js",
         headers: [
-          {
-            key: "Content-Type",
-            value: "application/javascript; charset=utf-8",
-          },
           {
             key: "Cache-Control",
             value: "public, max-age=0, must-revalidate",

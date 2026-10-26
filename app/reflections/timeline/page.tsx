@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FruitTags } from "@/components/fruit-tags";
-import { LogoutForm } from "@/components/logout-form";
+import { SiteHeader } from "@/components/site-header";
 import { formatReflectionDate } from "@/lib/dates";
 import { FRUIT_LABELS, FRUITS } from "@/lib/fruits";
 import { groupReflectionsByMonth } from "@/lib/reflection-insights";
@@ -40,26 +40,7 @@ export default async function TimelinePage({
 
   return (
     <main className="page-shell">
-      <header className="site-header">
-        <Link className="wordmark" href="/">
-          Abide
-        </Link>
-        <nav className="header-nav" aria-label="Primary navigation">
-          <Link className="header-link" href="/">
-            Dashboard
-          </Link>
-          <Link className="header-link" href="/prayers">
-            Prayers
-          </Link>
-          <Link className="header-link" href="/testimonies">
-            Testimonies
-          </Link>
-          <Link className="header-link" href="/settings">
-            Settings
-          </Link>
-          <LogoutForm />
-        </nav>
-      </header>
+      <SiteHeader currentHref="/reflections/timeline" />
 
       <header className="timeline-heading">
         <p className="eyebrow">Your journey</p>
