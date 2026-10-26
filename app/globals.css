@@ -130,6 +130,7 @@ a {
 
 .site-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
@@ -146,7 +147,9 @@ a {
 
 .header-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 1rem;
 }
 
@@ -783,6 +786,93 @@ a {
   font-size: clamp(1rem, 2vw, 1.2rem);
 }
 
+.settings-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 2rem;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  padding: clamp(1.3rem, 4vw, 2rem);
+  background: var(--paper);
+  box-shadow: var(--field-shadow);
+}
+
+.settings-card + .settings-card {
+  margin-top: 1.25rem;
+}
+
+.settings-copy h2 {
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--font-cormorant), serif;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1;
+}
+
+.settings-copy > p:last-child {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.settings-actions {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.settings-actions > .button {
+  justify-self: start;
+}
+
+.settings-status {
+  border: 1px solid var(--tag-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: var(--soft-surface);
+}
+
+.settings-status strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.settings-status p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.settings-status .settings-message {
+  margin-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.7rem;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.reminder-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.text-link:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.install-steps {
+  margin: 0.7rem 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.install-steps li + li {
+  margin-top: 0.3rem;
+}
+
 .timeline-tools {
   display: grid;
   grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
@@ -1091,6 +1181,14 @@ a {
   .timeline-tools,
   .timeline-filter-form {
     grid-template-columns: 1fr;
+  }
+
+  .settings-card {
+    grid-template-columns: 1fr;
+  }
+
+  .header-nav {
+    justify-content: flex-start;
   }
 
   .timeline-results-heading,
