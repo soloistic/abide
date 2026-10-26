@@ -31,6 +31,9 @@ export default async function TestimoniesPage() {
           <Link className="header-link" href="/prayers">
             Prayers
           </Link>
+          <Link className="header-link" href="/settings">
+            Settings
+          </Link>
           <LogoutForm />
         </nav>
       </header>

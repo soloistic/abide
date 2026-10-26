@@ -64,8 +64,15 @@ Fruit focus and prayer notes are nullable so reflections created before these
 features remain valid. Prompts live in application code rather than the
 database, keeping the first version simple and editable by the product team.
 
+`PushSubscription` stores one row per device that has opted into the evening
+reminder. The endpoint is unique, so re-enabling on the same browser updates the
+row rather than duplicating it. `lastReminderDate` prevents a second delivery on
+the same calendar day, and expired subscriptions are removed when the push
+service reports them as gone.
+
 The MVP is deliberately single-user. Before adding multi-user accounts, add a
 user relation and change the unique constraint to `(userId, reflectionDate)`.
+Reminder subscriptions should also gain an owner relation at that point.
 
 ## Dates and timezones
 
@@ -83,10 +90,15 @@ Prisma uses the PostgreSQL driver adapter, which works with a standard local
 PostgreSQL URL and Neon’s pooled connection URL. Vercel must receive:
 
 - `DATABASE_URL`: the pooled Neon PostgreSQL URL;
-- `APP_TIME_ZONE`: the timezone used for “today”;
+- `APP_TIME_ZONE`: the timezone used for “today” and the evening reminder;
 - `ABIDE_AUTH_USERNAME`: the one username allowed to open the journal;
 - `ABIDE_AUTH_PASSWORD`: the private password for that username;
-- `ABIDE_SESSION_SECRET`: a long random value used to sign session cookies.
+- `ABIDE_SESSION_SECRET`: a long random value used to sign session cookies;
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: the public VAPID key for Web Push;
+- `VAPID_PRIVATE_KEY`: the private VAPID key for Web Push;
+- `VAPID_SUBJECT`: a `mailto:` address or `https:` URL identifying the push
+  sender;
+- `CRON_SECRET`: the bearer token Vercel sends to the reminder endpoint.
 
 Use `prisma migrate deploy` for production migrations. Pages call Next.js
 `connection()` before database reads, keeping database work at request time
@@ -131,14 +143,45 @@ use Neon’s pooled connection string independently.
 
 ## Progressive web app
 
-Abide is installable: `app/manifest.ts` serves the web manifest, icons live
-in `public/icons/` with an `apple-touch-icon.png`, and the layout sets
-standalone display metadata. A hand-written `public/sw.js` (registered only
-in production builds) keeps navigations network-first with an `/offline`
-fallback and caches static assets; it handles same-origin GET requests only,
-so Server Action mutations are never cached or replayed. The proxy matcher
-leaves the service worker, manifest, and offline page public so installation
-and offline use never depend on a session cookie.
+Abide is installable: `app/manifest.ts` serves the web manifest with a stable
+identity, `en-GB` language, standalone display, app shortcuts, icons under
+`public/icons/`, and an `apple-touch-icon.png`. The layout sets standalone
+metadata, and `/settings` offers install guidance, including the iOS
+Add to Home Screen steps required before Web Push can work there.
+
+A hand-written `public/sw.js` is registered on every build; development
+registrations carry a `development` flag so they never cache requests, while
+production keeps navigations network-first with an `/offline` fallback and
+caches static assets. It handles same-origin GET requests only, so Server
+Action mutations are never cached or replayed. The proxy matcher leaves the
+service worker, manifest, offline page, and secret-guarded cron route public so
+installation, offline use, and scheduled reminders never depend on a session
+cookie.
+
+### Evening reminder
+
+`/settings` lets each device opt into one daily reminder around 8:00 pm in
+`APP_TIME_ZONE`. Enabling it asks for notification permission from a user
+gesture, creates a standard Web Push subscription, and stores its endpoint and
+keys in `PushSubscription`. Turning it off unsubscribes the browser and removes
+the row. A test button sends a one-off notification to the current device so
+delivery can be checked without waiting for the evening.
+
+`/api/cron/daily-reminder` reads `CRON_SECRET` from the bearer token, confirms
+that the local hour is 20, and skips delivery if today’s reflection already
+exists. It then sends to subscriptions that have not received a reminder for
+that calendar date, records `lastReminderDate`, and deletes endpoints that the
+push service reports as expired. `vercel.json` invokes the endpoint at 19:00 and
+20:00 UTC daily; together those runs land on 8:00 pm local on both sides of
+British daylight saving time. Other timezones need their two UTC schedules
+adjusted to the same rule.
+
+The service worker handles `push` by showing a quiet notification and
+`notificationclick` by focusing an open Abide window or opening the reflection
+form. Notifications are never used for streaks, scores, or pressure. The cron
+route is excluded from the session proxy because it has its own secret, while
+the push subscribe, unsubscribe, and test actions require an authenticated
+session.
 
 ## Product and usability guardrails
 

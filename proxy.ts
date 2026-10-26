@@ -30,6 +30,7 @@ export const config = {
   matcher: [
     // PWA plumbing (service worker, manifest, offline fallback) stays public
     // so installation and offline use never depend on a session cookie.
-    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|offline|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Cron routes authenticate themselves with CRON_SECRET instead.
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|offline|api/cron/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

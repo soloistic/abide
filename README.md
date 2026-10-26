@@ -47,6 +47,25 @@ single-user login. There is no email provider or paid auth service involved.
 Abide is still a single-user, PostgreSQL-backed app, so the local database does
 not need account or ownership tables.
 
+Daily reflection reminders use standard Web Push. Generate a VAPID key pair:
+
+```bash
+npm run push:keys
+```
+
+Add the public key, private key, and a contact subject to `.env.local`:
+
+```bash
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."
+VAPID_PRIVATE_KEY="..."
+VAPID_SUBJECT="mailto:you@example.com"
+CRON_SECRET="a-long-random-secret"
+```
+
+`CRON_SECRET` protects the scheduled reminder endpoint. Reminders are optional:
+without these values the journal, offline support, and installation still work,
+and the settings page explains that reminders are not configured.
+
 Install, migrate, and run:
 
 ```bash
@@ -56,6 +75,33 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Daily reflection reminder
+
+Open **Settings** in the app and enable the evening reminder on each device you
+want to use. Abide asks the browser for notification permission only when you
+choose to enable it. The reminder is skipped when today’s reflection already
+exists, and it can be turned off again from Settings.
+
+In production, `vercel.json` schedules the reminder endpoint twice a day at
+19:00 and 20:00 UTC. The endpoint only sends when it is 8:00 pm in
+`APP_TIME_ZONE`, so one of the two schedules covers each side of daylight
+saving time for `Europe/London`. If you use a different timezone, adjust the two
+UTC schedules to the two hours that can be 8:00 pm local across daylight
+saving changes.
+
+Vercel automatically sends `Authorization: Bearer $CRON_SECRET` to cron
+requests when `CRON_SECRET` is set in the project environment. You can invoke
+the endpoint manually for diagnosis:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  http://localhost:3000/api/cron/daily-reminder
+```
+
+Notifications require HTTPS outside localhost. On iPhone and iPad, Web Push
+only works after Abide is added to the Home Screen; the Settings page includes
+those instructions.
 
 ### Environment files and database URLs
 
@@ -120,13 +166,16 @@ Router pages, Server Actions, Prisma queries, and progressive-enhancement forms.
 
 1. Create a Neon project and copy its pooled PostgreSQL connection string.
 2. Add `DATABASE_URL`, `APP_TIME_ZONE`, `ABIDE_AUTH_USERNAME`,
-   `ABIDE_AUTH_PASSWORD`, and `ABIDE_SESSION_SECRET` to the Vercel project
-   environments.
-3. In GitHub, create an environment named `production`.
-4. Add a `DATABASE_URL` environment secret containing Neon’s direct, unpooled
+   `ABIDE_AUTH_PASSWORD`, `ABIDE_SESSION_SECRET`,
+   `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, and
+   `CRON_SECRET` to the Vercel project environments.
+3. Confirm that `vercel.json` is part of the production deployment so the two
+   daily reminder cron jobs are registered.
+4. In GitHub, create an environment named `production`.
+5. Add a `DATABASE_URL` environment secret containing Neon’s direct, unpooled
    connection string. Add required reviewers to the environment if migrations
    should require approval.
-5. Deploy the Next.js application to Vercel.
+6. Deploy the Next.js application to Vercel.
 
 Do not commit `.env.local`; it is ignored by Git.
 

@@ -34,6 +34,7 @@ export default async function Home() {
           <Link href="/reflections/timeline">Fruit timeline</Link>
           <Link href="/prayers">Prayers</Link>
           <Link href="/testimonies">Testimonies</Link>
+          <Link href="/settings">Settings</Link>
           <LogoutForm />
           <span>A quiet record of transformation</span>
         </nav>
